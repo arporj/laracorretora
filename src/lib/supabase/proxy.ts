@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isMockMode, MOCK_SESSION_COOKIE } from "@/lib/mock/config";
 
 /**
  * Checagem otimista de sessão, chamada pelo proxy.ts (equivalente ao
@@ -9,6 +10,18 @@ import { NextResponse, type NextRequest } from "next/server";
  * acontece em requireAuth(), chamado nas Server Components/Actions.
  */
 export async function updateSession(request: NextRequest) {
+  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
+
+  if (isMockMode()) {
+    const logado = request.cookies.get(MOCK_SESSION_COOKIE)?.value === "1";
+    if (isAdminRoute && !logado) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("next", request.nextUrl.pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -35,8 +48,6 @@ export async function updateSession(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
 
   if (isAdminRoute && !user) {
     const loginUrl = new URL("/login", request.url);

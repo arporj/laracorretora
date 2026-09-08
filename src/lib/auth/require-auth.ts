@@ -1,6 +1,8 @@
 import "server-only";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isMockMode } from "@/lib/mock/config";
+import { hasMockSession } from "@/lib/mock/auth";
 
 /**
  * Checagem real de autorização: confirma sessão válida E pertencimento à
@@ -9,6 +11,11 @@ import { createClient } from "@/lib/supabase/server";
  * desnecessário), esta aqui é a que realmente protege os dados.
  */
 export async function requireAuth() {
+  if (isMockMode()) {
+    if (!(await hasMockSession())) redirect("/login");
+    return { id: "mock-admin" };
+  }
+
   const supabase = await createClient();
 
   const {

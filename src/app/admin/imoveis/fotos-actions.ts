@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isMockMode } from "@/lib/mock/config";
+import { mockDeleteFoto, mockReorderFotos, mockUploadFoto } from "@/lib/mock/mutations";
 
 export type FotoActionResultado = { ok: true } | { ok: false; erro: string };
 
@@ -16,6 +18,15 @@ export async function uploadFoto(
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
     return { ok: false, erro: "Selecione uma imagem." };
+  }
+
+  if (isMockMode()) {
+    const resultado = await mockUploadFoto(imovelId, file);
+    if (resultado.ok) {
+      revalidatePath(`/admin/imoveis/${imovelId}/editar`);
+      revalidatePath("/");
+    }
+    return resultado;
   }
 
   const admin = createAdminClient();
@@ -61,6 +72,13 @@ export async function uploadFoto(
 export async function deleteFoto(imovelId: string, fotoId: string, storagePath: string) {
   await requireAuth();
 
+  if (isMockMode()) {
+    mockDeleteFoto(imovelId, fotoId);
+    revalidatePath(`/admin/imoveis/${imovelId}/editar`);
+    revalidatePath("/");
+    return;
+  }
+
   const admin = createAdminClient();
   const supabase = await createClient();
 
@@ -75,13 +93,17 @@ export async function deleteFoto(imovelId: string, fotoId: string, storagePath: 
 
 export async function reorderFotos(imovelId: string, fotoIdsEmOrdem: string[]) {
   await requireAuth();
-  const supabase = await createClient();
 
-  await Promise.all(
-    fotoIdsEmOrdem.map((fotoId, index) =>
-      supabase.from("imovel_fotos").update({ ordem: index }).eq("id", fotoId),
-    ),
-  );
+  if (isMockMode()) {
+    mockReorderFotos(imovelId, fotoIdsEmOrdem);
+  } else {
+    const supabase = await createClient();
+    await Promise.all(
+      fotoIdsEmOrdem.map((fotoId, index) =>
+        supabase.from("imovel_fotos").update({ ordem: index }).eq("id", fotoId),
+      ),
+    );
+  }
 
   revalidatePath(`/admin/imoveis/${imovelId}/editar`);
   revalidatePath("/");

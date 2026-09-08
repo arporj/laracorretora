@@ -1,5 +1,9 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { isMockMode } from "@/lib/mock/config";
+import { mockCriarLead, mockUpdateLeadStatus } from "@/lib/mock/mutations";
+import { mockGetLeadsComImovel } from "@/lib/mock/queries";
+import type { StatusLead } from "@/lib/domain/types";
 
 export interface NovoLeadInput {
   imovelId?: string | null;
@@ -37,16 +41,22 @@ export async function criarLead(input: NovoLeadInput): Promise<NovoLeadResultado
     return { ok: false, erro: "Informe um telefone válido." };
   }
 
-  const supabase = await createClient();
-  const { error } = await supabase.from("leads").insert({
-    imovel_id: input.imovelId ?? null,
+  const dados = {
+    imovelId: input.imovelId ?? null,
     nome,
     telefone,
     email: input.email?.trim() || null,
     mensagem: input.mensagem?.trim() || null,
     origem: input.origem,
-    status: "novo",
-  });
+  };
+
+  if (isMockMode()) {
+    mockCriarLead(dados);
+    return { ok: true };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("leads").insert({ ...dados, status: "novo" });
 
   if (error) {
     console.error("Erro ao criar lead:", error);
@@ -54,4 +64,28 @@ export async function criarLead(input: NovoLeadInput): Promise<NovoLeadResultado
   }
 
   return { ok: true };
+}
+
+export async function getLeadsComImovel() {
+  if (isMockMode()) return mockGetLeadsComImovel();
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("leads")
+    .select("*, imoveis(titulo, codigo, slug)")
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function updateLeadStatus(leadId: string, status: StatusLead): Promise<void> {
+  if (isMockMode()) {
+    mockUpdateLeadStatus(leadId, status);
+    return;
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("leads").update({ status }).eq("id", leadId);
+  if (error) throw error;
 }

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getImovelByIdComFotos } from "@/lib/domain/imoveis-repo";
 import { ImovelForm } from "../../ImovelForm";
 import { FotosUploader } from "../../FotosUploader";
 import { StatusEDestaque } from "./StatusEDestaque";
@@ -11,12 +11,7 @@ interface EditarImovelPageProps {
 
 export default async function EditarImovelPage({ params }: EditarImovelPageProps) {
   const { id } = await params;
-  const supabase = await createClient();
-
-  const [{ data: imovel }, { data: fotos }] = await Promise.all([
-    supabase.from("imoveis").select("*").eq("id", id).maybeSingle(),
-    supabase.from("imovel_fotos").select("*").eq("imovel_id", id).order("ordem"),
-  ]);
+  const imovel = await getImovelByIdComFotos(id);
 
   if (!imovel) {
     notFound();
@@ -35,7 +30,7 @@ export default async function EditarImovelPage({ params }: EditarImovelPageProps
 
       <section>
         <h2 className="mb-3 font-semibold text-ink">Fotos</h2>
-        <FotosUploader imovelId={imovel.id} fotos={fotos ?? []} />
+        <FotosUploader imovelId={imovel.id} fotos={imovel.imovel_fotos} />
       </section>
 
       <section>

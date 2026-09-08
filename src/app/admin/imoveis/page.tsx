@@ -1,15 +1,9 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { getAllImoveisAdmin } from "@/lib/domain/imoveis-repo";
 import { ImoveisTable } from "./ImoveisTable";
 
 export default async function AdminImoveisPage() {
-  const supabase = await createClient();
-  const { data: imoveis, error } = await supabase
-    .from("imoveis")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
+  const imoveis = await getAllImoveisAdmin();
 
   return (
     <div>

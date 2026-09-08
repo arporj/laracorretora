@@ -2,14 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth/require-auth";
-import { createClient } from "@/lib/supabase/server";
+import { updateLeadStatus as updateLeadStatusRepo } from "@/lib/leads";
 import type { StatusLead } from "@/lib/domain/types";
 
 export async function updateLeadStatus(leadId: string, status: StatusLead) {
   await requireAuth();
-  const supabase = await createClient();
-  const { error } = await supabase.from("leads").update({ status }).eq("id", leadId);
-  if (error) throw error;
-
+  await updateLeadStatusRepo(leadId, status);
   revalidatePath("/admin/leads");
 }

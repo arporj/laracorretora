@@ -1,4 +1,5 @@
 import { Logo } from "@/components/Logo";
+import { isMockMode, MOCK_ADMIN_EMAIL, MOCK_ADMIN_PASSWORD } from "@/lib/mock/config";
 import { LoginForm } from "./LoginForm";
 import { signIn } from "./actions";
 
@@ -21,6 +22,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <h1 className="mb-6 text-center text-lg font-semibold text-ink">
           Área administrativa
         </h1>
+        {isMockMode() && (
+          <p className="mb-4 rounded-lg bg-orange/10 px-3 py-2 text-center text-xs text-orange-dark">
+            Modo demonstração — entre com <strong>{MOCK_ADMIN_EMAIL}</strong> /{" "}
+            <strong>{MOCK_ADMIN_PASSWORD}</strong>
+          </p>
+        )}
         <LoginForm action={signInAction} />
       </div>
     </div>

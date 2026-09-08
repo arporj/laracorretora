@@ -7,6 +7,14 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { reaisToCents } from "@/lib/domain/format";
 import { buildCodigo, buildSlug } from "@/lib/domain/slug";
+import { isMockMode } from "@/lib/mock/config";
+import {
+  mockCreateImovel,
+  mockDeleteImovel,
+  mockToggleDestaque,
+  mockUpdateImovel,
+  mockUpdateImovelStatus,
+} from "@/lib/mock/mutations";
 import type { Finalidade, StatusImovel, TipoImovel } from "@/lib/domain/types";
 
 export type ImovelActionResultado = { ok: true } | { ok: false; erro: string };
@@ -50,13 +58,20 @@ function readImovelForm(formData: FormData) {
 
 export async function createImovel(formData: FormData): Promise<ImovelActionResultado> {
   await requireAuth();
-  const supabase = await createClient();
   const dados = readImovelForm(formData);
 
   if (dados.titulo.length < 3) {
     return { ok: false, erro: "Informe um título com pelo menos 3 caracteres." };
   }
 
+  if (isMockMode()) {
+    mockCreateImovel(dados);
+    revalidatePath("/admin/imoveis");
+    revalidatePath("/");
+    redirect(`/admin/imoveis`);
+  }
+
+  const supabase = await createClient();
   const { data: seq, error: seqError } = await supabase.rpc("nextval_imoveis_codigo");
   if (seqError || !seq) {
     return { ok: false, erro: "Não foi possível gerar o código do imóvel." };
@@ -82,18 +97,22 @@ export async function updateImovel(
   formData: FormData,
 ): Promise<ImovelActionResultado> {
   await requireAuth();
-  const supabase = await createClient();
   const dados = readImovelForm(formData);
 
   if (dados.titulo.length < 3) {
     return { ok: false, erro: "Informe um título com pelo menos 3 caracteres." };
   }
 
-  const { error } = await supabase.from("imoveis").update(dados).eq("id", imovelId);
+  if (isMockMode()) {
+    mockUpdateImovel(imovelId, dados);
+  } else {
+    const supabase = await createClient();
+    const { error } = await supabase.from("imoveis").update(dados).eq("id", imovelId);
 
-  if (error) {
-    console.error("Erro ao atualizar imóvel:", error);
-    return { ok: false, erro: "Não foi possível salvar as alterações." };
+    if (error) {
+      console.error("Erro ao atualizar imóvel:", error);
+      return { ok: false, erro: "Não foi possível salvar as alterações." };
+    }
   }
 
   revalidatePath("/admin/imoveis");
@@ -104,9 +123,14 @@ export async function updateImovel(
 
 export async function updateImovelStatus(imovelId: string, status: StatusImovel) {
   await requireAuth();
-  const supabase = await createClient();
-  const { error } = await supabase.from("imoveis").update({ status }).eq("id", imovelId);
-  if (error) throw error;
+
+  if (isMockMode()) {
+    mockUpdateImovelStatus(imovelId, status);
+  } else {
+    const supabase = await createClient();
+    const { error } = await supabase.from("imoveis").update({ status }).eq("id", imovelId);
+    if (error) throw error;
+  }
 
   revalidatePath("/admin/imoveis");
   revalidatePath("/");
@@ -114,9 +138,14 @@ export async function updateImovelStatus(imovelId: string, status: StatusImovel)
 
 export async function toggleDestaque(imovelId: string, destaque: boolean) {
   await requireAuth();
-  const supabase = await createClient();
-  const { error } = await supabase.from("imoveis").update({ destaque }).eq("id", imovelId);
-  if (error) throw error;
+
+  if (isMockMode()) {
+    mockToggleDestaque(imovelId, destaque);
+  } else {
+    const supabase = await createClient();
+    const { error } = await supabase.from("imoveis").update({ destaque }).eq("id", imovelId);
+    if (error) throw error;
+  }
 
   revalidatePath("/admin/imoveis");
   revalidatePath("/");
@@ -124,6 +153,14 @@ export async function toggleDestaque(imovelId: string, destaque: boolean) {
 
 export async function deleteImovel(imovelId: string) {
   await requireAuth();
+
+  if (isMockMode()) {
+    mockDeleteImovel(imovelId);
+    revalidatePath("/admin/imoveis");
+    revalidatePath("/");
+    return;
+  }
+
   const supabase = await createClient();
   const admin = createAdminClient();
 

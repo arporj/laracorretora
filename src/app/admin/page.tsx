@@ -1,28 +1,5 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-
-async function getStats() {
-  const supabase = await createClient();
-
-  const [{ count: totalImoveis }, { count: disponiveis }, { count: leadsNovos }] =
-    await Promise.all([
-      supabase.from("imoveis").select("*", { count: "exact", head: true }),
-      supabase
-        .from("imoveis")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "disponivel"),
-      supabase
-        .from("leads")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "novo"),
-    ]);
-
-  return {
-    totalImoveis: totalImoveis ?? 0,
-    disponiveis: disponiveis ?? 0,
-    leadsNovos: leadsNovos ?? 0,
-  };
-}
+import { getStats } from "@/lib/domain/imoveis-repo";
 
 export default async function AdminDashboardPage() {
   const stats = await getStats();
