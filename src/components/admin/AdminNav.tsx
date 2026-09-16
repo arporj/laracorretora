@@ -9,8 +9,11 @@ const LINKS = [
   { href: "/admin/leads", label: "Leads" },
 ];
 
-export function AdminNav() {
+export function AdminNav({ isSuperAdmin = false }: { isSuperAdmin?: boolean }) {
   const pathname = usePathname();
+  const links = isSuperAdmin
+    ? [...LINKS, { href: "/admin/administradores", label: "Administradores" }]
+    : LINKS;
 
   return (
     <header className="border-b border-border bg-charcoal text-white">
@@ -18,7 +21,7 @@ export function AdminNav() {
         <div className="flex items-center gap-6">
           <span className="font-bold">LARA · Admin</span>
           <nav className="flex gap-4 text-sm">
-            {LINKS.map((link) => {
+            {links.map((link) => {
               const active =
                 link.href === "/admin" ? pathname === link.href : pathname.startsWith(link.href);
               return (

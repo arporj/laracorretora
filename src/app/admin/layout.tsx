@@ -3,12 +3,12 @@ import { AdminNav } from "@/components/admin/AdminNav";
 import { MockModeBanner } from "@/components/MockModeBanner";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  await requireAuth();
+  const admin = await requireAuth();
 
   return (
     <div className="min-h-full bg-cream">
       <MockModeBanner />
-      <AdminNav />
+      <AdminNav isSuperAdmin={admin.isSuperAdmin} />
       <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
     </div>
   );

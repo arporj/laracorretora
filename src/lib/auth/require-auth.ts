@@ -13,7 +13,9 @@ import { hasMockSession } from "@/lib/mock/auth";
 export async function requireAuth() {
   if (isMockMode()) {
     if (!(await hasMockSession())) redirect("/login");
-    return { id: "mock-admin" };
+    // Modo demonstração tem um único admin fictício — tratado como
+    // super-admin pra dar pra navegar pela tela de gerenciamento também.
+    return { id: "mock-admin", isSuperAdmin: true };
   }
 
   const supabase = await createClient();
@@ -28,7 +30,7 @@ export async function requireAuth() {
 
   const { data: adminRow } = await supabase
     .from("admins")
-    .select("user_id")
+    .select("user_id, is_super_admin")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -36,5 +38,17 @@ export async function requireAuth() {
     redirect("/login");
   }
 
-  return user;
+  return { ...user, isSuperAdmin: adminRow.is_super_admin };
+}
+
+/**
+ * Como requireAuth(), mas também garante que quem está chamando é o
+ * super-admin — usado antes de qualquer operação que crie/revogue admins.
+ */
+export async function requireSuperAdmin() {
+  const admin = await requireAuth();
+  if (!admin.isSuperAdmin) {
+    throw new Error("Só o super-admin pode gerenciar outros administradores.");
+  }
+  return admin;
 }
