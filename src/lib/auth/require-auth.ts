@@ -28,11 +28,15 @@ export async function requireAuth() {
     redirect("/login");
   }
 
-  const { data: adminRow } = await supabase
+  const { data: adminRow, error } = await supabase
     .from("admins")
     .select("user_id, is_super_admin")
     .eq("user_id", user.id)
     .maybeSingle();
+
+  if (error) {
+    console.error("Erro ao checar allow-list de admins:", error);
+  }
 
   if (!adminRow) {
     redirect("/login");

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Logo } from "@/components/Logo";
 
 export function SiteFooter() {
@@ -27,8 +28,13 @@ export function SiteFooter() {
           </a>
         </div>
       </div>
-      <div className="border-t border-white/10 py-4 text-center text-xs text-white/50">
-        © {new Date().getFullYear()} LARA Negócios Imobiliários
+      <div className="border-t border-white/10 py-4">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 text-center text-xs text-white/50 sm:flex-row sm:justify-between">
+          <span>© {new Date().getFullYear()} LARA Negócios Imobiliários</span>
+          <Link href="/login" className="hover:text-orange-tint">
+            Área administrativa
+          </Link>
+        </div>
       </div>
     </footer>
   );
