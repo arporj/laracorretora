@@ -1,18 +1,65 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import { Input } from "@/components/Input";
+import { Select } from "@/components/Select";
 import { StatusImovelBadge } from "@/components/admin/StatusBadge";
 import { formatCentsToBRL } from "@/lib/domain/format";
-import type { Imovel } from "@/lib/domain/types";
+import {
+  FINALIDADE_LABELS,
+  STATUS_LABELS,
+  TIPO_LABELS,
+  type Finalidade,
+  type Imovel,
+  type StatusImovel,
+  type TipoImovel,
+} from "@/lib/domain/types";
 import { deleteImovel, toggleDestaque } from "./actions";
 
 export function ImoveisTable({ imoveis }: { imoveis: Imovel[] }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [paraExcluir, setParaExcluir] = useState<Imovel | null>(null);
+
+  const [busca, setBusca] = useState("");
+  const [status, setStatus] = useState<StatusImovel | "">("");
+  const [finalidade, setFinalidade] = useState<Finalidade | "">("");
+  const [tipo, setTipo] = useState<TipoImovel | "">("");
+
+  const filtrosAtivos = Boolean(busca || status || finalidade || tipo);
+
+  const imoveisFiltrados = useMemo(() => {
+    const termo = busca.trim().toLowerCase();
+    return imoveis.filter((imovel) => {
+      if (status && imovel.status !== status) return false;
+      if (finalidade && imovel.finalidade !== finalidade) return false;
+      if (tipo && imovel.tipo !== tipo) return false;
+      if (termo) {
+        const alvo = [
+          imovel.codigo,
+          imovel.titulo,
+          imovel.endereco_bairro,
+          imovel.endereco_cidade,
+          imovel.endereco_estado,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        if (!alvo.includes(termo)) return false;
+      }
+      return true;
+    });
+  }, [imoveis, busca, status, finalidade, tipo]);
+
+  function limparFiltros() {
+    setBusca("");
+    setStatus("");
+    setFinalidade("");
+    setTipo("");
+  }
 
   function confirmarExclusao() {
     if (!paraExcluir) return;
@@ -32,58 +79,132 @@ export function ImoveisTable({ imoveis }: { imoveis: Imovel[] }) {
 
   return (
     <>
-      <div className="overflow-x-auto rounded-2xl border border-border bg-white">
-        <table className="w-full text-sm">
-          <thead className="border-b border-border text-left text-xs uppercase text-muted">
-            <tr>
-              <th className="px-4 py-3">Código</th>
-              <th className="px-4 py-3">Título</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Preço</th>
-              <th className="px-4 py-3">Destaque</th>
-              <th className="px-4 py-3" />
-            </tr>
-          </thead>
-          <tbody>
-            {imoveis.map((imovel) => (
-              <tr key={imovel.id} className="border-b border-border last:border-0">
-                <td className="px-4 py-3 text-muted">{imovel.codigo}</td>
-                <td className="px-4 py-3 font-medium text-ink">{imovel.titulo}</td>
-                <td className="px-4 py-3">
-                  <StatusImovelBadge status={imovel.status} />
-                </td>
-                <td className="px-4 py-3">
-                  {imovel.finalidade !== "aluguel"
-                    ? formatCentsToBRL(imovel.preco_venda_cents)
-                    : formatCentsToBRL(imovel.preco_aluguel_cents)}
-                </td>
-                <td className="px-4 py-3">
-                  <button
-                    type="button"
-                    onClick={() => alternarDestaque(imovel)}
-                    disabled={pending}
-                    className={imovel.destaque ? "text-orange" : "text-muted"}
-                  >
-                    {imovel.destaque ? "★ Sim" : "☆ Não"}
-                  </button>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <Link href={`/admin/imoveis/${imovel.id}/editar`} className="mr-3 text-orange hover:underline">
-                    Editar
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => setParaExcluir(imovel)}
-                    className="text-danger hover:underline"
-                  >
-                    Excluir
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-border bg-white p-4 sm:flex-row sm:flex-wrap sm:items-end">
+        <Input
+          label="Buscar"
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          placeholder="Código, título, bairro ou cidade"
+          className="sm:flex-1 sm:min-w-[220px]"
+        />
+        <Select
+          label="Status"
+          value={status}
+          onChange={(e) => setStatus(e.target.value as StatusImovel | "")}
+          className="sm:w-44"
+        >
+          <option value="">Todos</option>
+          {Object.entries(STATUS_LABELS).map(([valor, label]) => (
+            <option key={valor} value={valor}>
+              {label}
+            </option>
+          ))}
+        </Select>
+        <Select
+          label="Finalidade"
+          value={finalidade}
+          onChange={(e) => setFinalidade(e.target.value as Finalidade | "")}
+          className="sm:w-44"
+        >
+          <option value="">Todas</option>
+          {Object.entries(FINALIDADE_LABELS).map(([valor, label]) => (
+            <option key={valor} value={valor}>
+              {label}
+            </option>
+          ))}
+        </Select>
+        <Select
+          label="Tipo"
+          value={tipo}
+          onChange={(e) => setTipo(e.target.value as TipoImovel | "")}
+          className="sm:w-44"
+        >
+          <option value="">Todos</option>
+          {Object.entries(TIPO_LABELS).map(([valor, label]) => (
+            <option key={valor} value={valor}>
+              {label}
+            </option>
+          ))}
+        </Select>
+        {filtrosAtivos && (
+          <button type="button" onClick={limparFiltros} className="text-sm text-muted hover:text-ink">
+            Limpar filtros
+          </button>
+        )}
       </div>
+
+      {imoveisFiltrados.length === 0 ? (
+        <p className="rounded-2xl border border-border bg-white p-6 text-center text-muted">
+          Nenhum imóvel encontrado com esses filtros.
+        </p>
+      ) : (
+        <div className="overflow-x-auto rounded-2xl border border-border bg-white">
+          <table className="w-full text-sm">
+            <thead className="border-b border-border text-left text-xs uppercase text-muted">
+              <tr>
+                <th className="px-4 py-3">Código</th>
+                <th className="px-4 py-3">Título</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Preço</th>
+                <th className="px-4 py-3">Destaque</th>
+                <th className="px-4 py-3" />
+              </tr>
+            </thead>
+            <tbody>
+              {imoveisFiltrados.map((imovel) => (
+                <tr key={imovel.id} className="border-b border-border last:border-0">
+                  <td className="px-4 py-3 text-muted">{imovel.codigo}</td>
+                  <td className="px-4 py-3">
+                    <Link
+                      href={`/admin/imoveis/${imovel.id}/editar`}
+                      className="font-medium text-ink hover:text-orange hover:underline"
+                    >
+                      {imovel.titulo}
+                    </Link>
+                    <div className="mt-0.5 text-xs text-muted">
+                      {[imovel.endereco_bairro, imovel.endereco_cidade, imovel.endereco_estado]
+                        .filter(Boolean)
+                        .join(", ") || "Endereço não informado"}
+                      {" · "}
+                      {TIPO_LABELS[imovel.tipo]} · {FINALIDADE_LABELS[imovel.finalidade]}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <StatusImovelBadge status={imovel.status} />
+                  </td>
+                  <td className="px-4 py-3">
+                    {imovel.finalidade !== "aluguel"
+                      ? formatCentsToBRL(imovel.preco_venda_cents)
+                      : formatCentsToBRL(imovel.preco_aluguel_cents)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      type="button"
+                      onClick={() => alternarDestaque(imovel)}
+                      disabled={pending}
+                      className={imovel.destaque ? "text-orange" : "text-muted"}
+                    >
+                      {imovel.destaque ? "★ Sim" : "☆ Não"}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Link href={`/admin/imoveis/${imovel.id}/editar`} className="mr-3 text-orange hover:underline">
+                      Editar
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setParaExcluir(imovel)}
+                      className="text-danger hover:underline"
+                    >
+                      Excluir
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <ConfirmModal
         open={paraExcluir != null}

@@ -6,8 +6,10 @@ import { Button } from "@/components/Button";
 import { Input, Textarea } from "@/components/Input";
 import { Select } from "@/components/Select";
 import { centsToReaisInput } from "@/lib/domain/format";
+import { COMODIDADES } from "@/lib/domain/comodidades";
 import type { Imovel } from "@/lib/domain/types";
 import type { ImovelActionResultado } from "./actions";
+import { EnderecoFields } from "./EnderecoFields";
 
 interface ImovelFormProps {
   action: (formData: FormData) => Promise<ImovelActionResultado>;
@@ -38,88 +40,118 @@ export function ImovelForm({ action, imovel, submitLabel = "Salvar" }: ImovelFor
 
   return (
     <form action={handleSubmit} className="flex flex-col gap-6">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Input label="Título" name="titulo" required defaultValue={imovel?.titulo} className="sm:col-span-2" />
-        <Select
-          label="Finalidade"
-          name="finalidade"
-          defaultValue={imovel?.finalidade ?? "venda"}
-          onChange={(e) => setFinalidade(e.target.value as typeof finalidade)}
-          required
-        >
-          <option value="venda">Venda</option>
-          <option value="aluguel">Aluguel</option>
-          <option value="venda_aluguel">Venda ou Aluguel</option>
-        </Select>
-        <Select label="Tipo" name="tipo" defaultValue={imovel?.tipo ?? "apartamento"} required>
-          <option value="apartamento">Apartamento</option>
-          <option value="casa">Casa</option>
-          <option value="terreno">Terreno</option>
-          <option value="comercial">Comercial</option>
-          <option value="rural">Rural</option>
-          <option value="outro">Outro</option>
-        </Select>
-      </div>
+      <section className="rounded-2xl border border-border bg-white p-6">
+        <h2 className="mb-4 font-semibold text-ink">Informações básicas</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Input label="Título" name="titulo" required defaultValue={imovel?.titulo} className="sm:col-span-2" />
+          <Select
+            label="Finalidade"
+            name="finalidade"
+            defaultValue={imovel?.finalidade ?? "venda"}
+            onChange={(e) => setFinalidade(e.target.value as typeof finalidade)}
+            required
+          >
+            <option value="venda">Venda</option>
+            <option value="aluguel">Aluguel</option>
+            <option value="venda_aluguel">Venda ou Aluguel</option>
+          </Select>
+          <Select label="Tipo" name="tipo" defaultValue={imovel?.tipo ?? "apartamento"} required>
+            <option value="apartamento">Apartamento</option>
+            <option value="casa">Casa</option>
+            <option value="terreno">Terreno</option>
+            <option value="comercial">Comercial</option>
+            <option value="rural">Rural</option>
+            <option value="outro">Outro</option>
+          </Select>
+          <Textarea
+            label="Descrição"
+            name="descricao"
+            rows={5}
+            defaultValue={imovel?.descricao ?? ""}
+            className="sm:col-span-2"
+          />
+        </div>
+      </section>
 
-      <Textarea label="Descrição" name="descricao" rows={5} defaultValue={imovel?.descricao ?? ""} />
-
-      <div className="grid gap-4 sm:grid-cols-4">
-        {mostrarVenda && (
+      <section className="rounded-2xl border border-border bg-white p-6">
+        <h2 className="mb-4 font-semibold text-ink">Valores</h2>
+        <div className="grid gap-4 sm:grid-cols-4">
+          {mostrarVenda && (
+            <Input
+              label="Preço de venda (R$)"
+              name="preco_venda"
+              type="number"
+              step="0.01"
+              min="0"
+              defaultValue={centsToReaisInput(imovel?.preco_venda_cents ?? null)}
+            />
+          )}
+          {mostrarAluguel && (
+            <Input
+              label="Preço de aluguel (R$/mês)"
+              name="preco_aluguel"
+              type="number"
+              step="0.01"
+              min="0"
+              defaultValue={centsToReaisInput(imovel?.preco_aluguel_cents ?? null)}
+            />
+          )}
           <Input
-            label="Preço de venda (R$)"
-            name="preco_venda"
+            label="Condomínio (R$)"
+            name="condominio"
             type="number"
             step="0.01"
             min="0"
-            defaultValue={centsToReaisInput(imovel?.preco_venda_cents ?? null)}
+            defaultValue={centsToReaisInput(imovel?.condominio_cents ?? null)}
           />
-        )}
-        {mostrarAluguel && (
           <Input
-            label="Preço de aluguel (R$/mês)"
-            name="preco_aluguel"
+            label="IPTU (R$)"
+            name="iptu"
             type="number"
             step="0.01"
             min="0"
-            defaultValue={centsToReaisInput(imovel?.preco_aluguel_cents ?? null)}
+            defaultValue={centsToReaisInput(imovel?.iptu_cents ?? null)}
           />
-        )}
-        <Input
-          label="Condomínio (R$)"
-          name="condominio"
-          type="number"
-          step="0.01"
-          min="0"
-          defaultValue={centsToReaisInput(imovel?.condominio_cents ?? null)}
-        />
-        <Input
-          label="IPTU (R$)"
-          name="iptu"
-          type="number"
-          step="0.01"
-          min="0"
-          defaultValue={centsToReaisInput(imovel?.iptu_cents ?? null)}
-        />
-      </div>
+        </div>
+      </section>
 
-      <div className="grid gap-4 sm:grid-cols-6">
-        <Input label="Área total (m²)" name="area_total" type="number" step="0.01" min="0" defaultValue={imovel?.area_total ?? ""} />
-        <Input label="Área construída (m²)" name="area_construida" type="number" step="0.01" min="0" defaultValue={imovel?.area_construida ?? ""} />
-        <Input label="Quartos" name="quartos" type="number" min="0" defaultValue={imovel?.quartos ?? ""} />
-        <Input label="Suítes" name="suites" type="number" min="0" defaultValue={imovel?.suites ?? ""} />
-        <Input label="Banheiros" name="banheiros" type="number" min="0" defaultValue={imovel?.banheiros ?? ""} />
-        <Input label="Vagas" name="vagas" type="number" min="0" defaultValue={imovel?.vagas ?? ""} />
-      </div>
+      <section className="rounded-2xl border border-border bg-white p-6">
+        <h2 className="mb-4 font-semibold text-ink">Características</h2>
+        <div className="grid gap-4 sm:grid-cols-6">
+          <Input label="Área total (m²)" name="area_total" type="number" step="0.01" min="0" defaultValue={imovel?.area_total ?? ""} />
+          <Input label="Área construída (m²)" name="area_construida" type="number" step="0.01" min="0" defaultValue={imovel?.area_construida ?? ""} />
+          <Input label="Quartos" name="quartos" type="number" min="0" defaultValue={imovel?.quartos ?? ""} />
+          <Input label="Suítes" name="suites" type="number" min="0" defaultValue={imovel?.suites ?? ""} />
+          <Input label="Banheiros" name="banheiros" type="number" min="0" defaultValue={imovel?.banheiros ?? ""} />
+          <Input label="Vagas" name="vagas" type="number" min="0" defaultValue={imovel?.vagas ?? ""} />
+        </div>
+      </section>
 
-      <div className="grid gap-4 sm:grid-cols-6">
-        <Input label="Logradouro" name="endereco_logradouro" defaultValue={imovel?.endereco_logradouro ?? ""} className="sm:col-span-3" />
-        <Input label="Número" name="endereco_numero" defaultValue={imovel?.endereco_numero ?? ""} />
-        <Input label="Complemento" name="endereco_complemento" defaultValue={imovel?.endereco_complemento ?? ""} className="sm:col-span-2" />
-        <Input label="Bairro" name="endereco_bairro" defaultValue={imovel?.endereco_bairro ?? ""} className="sm:col-span-2" />
-        <Input label="Cidade" name="endereco_cidade" defaultValue={imovel?.endereco_cidade ?? "Rio de Janeiro"} className="sm:col-span-2" />
-        <Input label="UF" name="endereco_estado" maxLength={2} defaultValue={imovel?.endereco_estado ?? "RJ"} />
-        <Input label="CEP" name="endereco_cep" defaultValue={imovel?.endereco_cep ?? ""} />
-      </div>
+      <section className="rounded-2xl border border-border bg-white p-6">
+        <h2 className="mb-4 font-semibold text-ink">Comodidades</h2>
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {COMODIDADES.map((c) => (
+            <label
+              key={c.value}
+              className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-ink has-[:checked]:border-orange has-[:checked]:bg-orange-tint/30"
+            >
+              <input
+                type="checkbox"
+                name="comodidades"
+                value={c.value}
+                defaultChecked={imovel?.comodidades?.includes(c.value)}
+                className="h-4 w-4 accent-orange"
+              />
+              {c.label}
+            </label>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-border bg-white p-6">
+        <h2 className="mb-4 font-semibold text-ink">Endereço</h2>
+        <EnderecoFields imovel={imovel} />
+      </section>
 
       {erro && <p className="text-sm text-danger">{erro}</p>}
 

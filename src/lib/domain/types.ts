@@ -34,6 +34,8 @@ export interface Imovel {
   endereco_estado: string;
   endereco_cep: string | null;
 
+  comodidades: string[];
+
   created_at: string;
   updated_at: string;
 }

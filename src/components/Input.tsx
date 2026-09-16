@@ -10,12 +10,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   ref,
 ) {
   return (
-    <label className="flex flex-col gap-1 text-sm">
+    <label className={`flex flex-col gap-1 text-sm ${className}`}>
       {label && <span className="font-medium text-ink">{label}</span>}
       <input
         ref={ref}
         id={id}
-        className={`rounded-lg border border-border bg-white px-3 py-2 text-ink outline-none focus:border-orange focus:ring-1 focus:ring-orange ${className}`}
+        className="rounded-lg border border-border bg-white px-3 py-2 text-ink outline-none focus:border-orange focus:ring-1 focus:ring-orange"
         {...props}
       />
       {error && <span className="text-xs text-danger">{error}</span>}
@@ -31,12 +31,12 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   function Textarea({ label, error, id, className = "", ...props }, ref) {
     return (
-      <label className="flex flex-col gap-1 text-sm">
+      <label className={`flex flex-col gap-1 text-sm ${className}`}>
         {label && <span className="font-medium text-ink">{label}</span>}
         <textarea
           ref={ref}
           id={id}
-          className={`rounded-lg border border-border bg-white px-3 py-2 text-ink outline-none focus:border-orange focus:ring-1 focus:ring-orange ${className}`}
+          className="rounded-lg border border-border bg-white px-3 py-2 text-ink outline-none focus:border-orange focus:ring-1 focus:ring-orange"
           {...props}
         />
         {error && <span className="text-xs text-danger">{error}</span>}

@@ -3,6 +3,7 @@ import { Galeria } from "@/components/public/Galeria";
 import { ContatoForm } from "@/components/public/ContatoForm";
 import { getImovelBySlug } from "@/lib/domain/imoveis-repo";
 import { formatCentsToBRL, formatArea } from "@/lib/domain/format";
+import { COMODIDADE_LABELS } from "@/lib/domain/comodidades";
 import {
   FINALIDADE_LABELS,
   STATUS_LABELS,
@@ -79,6 +80,22 @@ export default async function ImovelDetalhePage({ params }: ImovelDetalhePagePro
               <p className="mt-6 whitespace-pre-line leading-relaxed text-ink">
                 {imovel.descricao}
               </p>
+            )}
+
+            {imovel.comodidades.length > 0 && (
+              <div className="mt-6">
+                <h2 className="mb-3 font-semibold text-ink">Comodidades</h2>
+                <ul className="flex flex-wrap gap-2">
+                  {imovel.comodidades.map((c) => (
+                    <li
+                      key={c}
+                      className="rounded-full border border-border bg-white px-3 py-1 text-sm text-ink"
+                    >
+                      {COMODIDADE_LABELS[c] ?? c}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         </div>

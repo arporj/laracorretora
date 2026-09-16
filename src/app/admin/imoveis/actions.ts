@@ -53,6 +53,7 @@ function readImovelForm(formData: FormData) {
     endereco_cidade: String(formData.get("endereco_cidade") || "Rio de Janeiro"),
     endereco_estado: String(formData.get("endereco_estado") || "RJ"),
     endereco_cep: strOrNull("endereco_cep"),
+    comodidades: formData.getAll("comodidades").map(String),
   };
 }
 
@@ -65,10 +66,10 @@ export async function createImovel(formData: FormData): Promise<ImovelActionResu
   }
 
   if (isMockMode()) {
-    mockCreateImovel(dados);
+    const imovel = mockCreateImovel(dados);
     revalidatePath("/admin/imoveis");
     revalidatePath("/");
-    redirect(`/admin/imoveis`);
+    redirect(`/admin/imoveis/${imovel.id}/editar`);
   }
 
   const supabase = await createClient();
@@ -80,16 +81,20 @@ export async function createImovel(formData: FormData): Promise<ImovelActionResu
   const codigo = buildCodigo(seq);
   const slug = buildSlug(dados.titulo, seq);
 
-  const { error } = await supabase.from("imoveis").insert({ ...dados, codigo, slug });
+  const { data: novoImovel, error } = await supabase
+    .from("imoveis")
+    .insert({ ...dados, codigo, slug })
+    .select("id")
+    .single();
 
-  if (error) {
+  if (error || !novoImovel) {
     console.error("Erro ao criar imóvel:", error);
     return { ok: false, erro: "Não foi possível salvar o imóvel." };
   }
 
   revalidatePath("/admin/imoveis");
   revalidatePath("/");
-  redirect(`/admin/imoveis`);
+  redirect(`/admin/imoveis/${novoImovel.id}/editar`);
 }
 
 export async function updateImovel(
