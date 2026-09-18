@@ -33,20 +33,16 @@ interface LogoProps {
 
 export function Logo({ variant = "dark", className = "" }: LogoProps) {
   const wordmarkColor = variant === "light" ? "text-white" : "text-charcoal";
-  const captionColor = variant === "light" ? "text-orange-tint" : "text-orange";
+  const captionColor = variant === "light" ? "text-gold-soft" : "text-gold";
 
   return (
     <div className={`flex items-center gap-3 ${className}`}>
       <LogoMark />
       <div className="leading-tight">
-        <div className={`text-2xl font-extrabold tracking-tight ${wordmarkColor}`}>
-          LARA
+        <div className={`font-display text-2xl font-semibold tracking-tight ${wordmarkColor}`}>
+          Lara
         </div>
-        <div
-          className={`text-[10px] font-semibold uppercase tracking-widest ${captionColor}`}
-        >
-          Negócios Imobiliários
-        </div>
+        <div className={`eyebrow ${captionColor}`}>Negócios Imobiliários</div>
       </div>
     </div>
   );

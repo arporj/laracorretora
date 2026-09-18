@@ -33,13 +33,13 @@ export function ConfirmModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/60 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/70 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-modal-title"
     >
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
-        <h2 id="confirm-modal-title" className="text-lg font-semibold text-ink">
+      <div className="fade-in w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+        <h2 id="confirm-modal-title" className="font-display text-lg font-semibold text-ink">
           {title}
         </h2>
         {description && (
