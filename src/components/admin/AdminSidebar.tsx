@@ -104,7 +104,7 @@ export function AdminSidebar({ isSuperAdmin, email }: AdminSidebarProps) {
   return (
     <>
       {/* Topbar mobile */}
-      <div className="flex items-center justify-between border-b border-white/10 bg-charcoal px-4 py-3 text-white lg:hidden">
+      <div className="sticky top-0 z-40 flex items-center justify-between border-b border-white/10 bg-charcoal px-4 py-3 text-white lg:hidden">
         <div className="flex items-center gap-2">
           <LogoMark size={26} />
           <span className="font-display text-base font-semibold">Lara Admin</span>
@@ -135,7 +135,7 @@ export function AdminSidebar({ isSuperAdmin, email }: AdminSidebarProps) {
             onClick={() => setOpen(false)}
             aria-hidden="true"
           />
-          <div className="fade-in fixed inset-y-0 left-0 flex w-72 flex-col bg-charcoal shadow-2xl">
+          <div className="fade-in fixed inset-y-0 right-0 flex w-72 flex-col bg-charcoal shadow-2xl">
             <button
               type="button"
               onClick={() => setOpen(false)}
