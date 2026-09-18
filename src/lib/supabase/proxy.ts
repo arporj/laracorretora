@@ -8,13 +8,21 @@ import { isMockMode, MOCK_SESSION_COOKIE } from "@/lib/mock/config";
  * Só confirma que existe um usuário logado e redireciona /admin/** para
  * /login quando não há — a checagem real (pertencer à tabela `admins`)
  * acontece em requireAuth(), chamado nas Server Components/Actions.
+ *
+ * Fora de /admin/** essa checagem nem é usada, então nem chamamos o
+ * Supabase Auth — evita uma requisição à toa (e o warning de "Refresh
+ * Token Not Found" que ele loga) em toda visita anônima ao site público.
  */
 export async function updateSession(request: NextRequest) {
   const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
 
+  if (!isAdminRoute) {
+    return NextResponse.next({ request });
+  }
+
   if (isMockMode()) {
     const logado = request.cookies.get(MOCK_SESSION_COOKIE)?.value === "1";
-    if (isAdminRoute && !logado) {
+    if (!logado) {
       const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set("next", request.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
@@ -49,7 +57,7 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (isAdminRoute && !user) {
+  if (!user) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
