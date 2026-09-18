@@ -2,6 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronLeft, ChevronRight, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/Button";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { Spinner } from "@/components/Spinner";
@@ -86,29 +87,37 @@ export function FotosUploader({ imovelId, fotos }: { imovelId: string; fotos: Im
           <div key={foto.id} className="relative h-28 w-36 overflow-hidden rounded-lg border border-border">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={foto.url} alt="" className="h-full w-full object-cover" />
-            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-charcoal/70 px-1 py-0.5">
+            {i === 0 && (
+              <span className="eyebrow absolute left-1.5 top-1.5 rounded-full bg-orange px-2 py-0.5 text-[10px] text-white">
+                Capa
+              </span>
+            )}
+            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-charcoal/70 px-1 py-1 backdrop-blur-sm">
               <button
                 type="button"
                 onClick={() => mover(i, -1)}
                 disabled={i === 0 || pending}
-                className="px-1 text-xs text-white disabled:opacity-30"
+                aria-label="Mover para a esquerda"
+                className="rounded p-1 text-white disabled:opacity-30"
               >
-                ‹
+                <ChevronLeft size={14} aria-hidden="true" />
               </button>
               <button
                 type="button"
                 onClick={() => setFotoParaExcluir(foto)}
-                className="px-1 text-xs text-white hover:text-orange-tint"
+                aria-label="Excluir foto"
+                className="rounded p-1 text-white hover:text-orange-tint"
               >
-                Excluir
+                <Trash2 size={14} aria-hidden="true" />
               </button>
               <button
                 type="button"
                 onClick={() => mover(i, 1)}
                 disabled={i === fotos.length - 1 || pending}
-                className="px-1 text-xs text-white disabled:opacity-30"
+                aria-label="Mover para a direita"
+                className="rounded p-1 text-white disabled:opacity-30"
               >
-                ›
+                <ChevronRight size={14} aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -125,8 +134,14 @@ export function FotosUploader({ imovelId, fotos }: { imovelId: string; fotos: Im
           onChange={(e) => handleFiles(e.target.files)}
           disabled={enviando}
         />
-        <Button type="button" variant="ghost" disabled={enviando} onClick={() => inputRef.current?.click()}>
-          {enviando ? <Spinner /> : null}
+        <Button
+          type="button"
+          variant="ghost"
+          disabled={enviando}
+          onClick={() => inputRef.current?.click()}
+          className="inline-flex items-center gap-2"
+        >
+          {enviando ? <Spinner /> : <Upload size={16} strokeWidth={1.75} aria-hidden="true" />}
           {enviando ? "Enviando..." : "Adicionar fotos"}
         </Button>
       </label>

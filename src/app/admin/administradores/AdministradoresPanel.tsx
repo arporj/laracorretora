@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { ShieldCheck, UserX, UserPlus } from "lucide-react";
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { ConfirmModal } from "@/components/ConfirmModal";
@@ -73,7 +74,8 @@ export function AdministradoresPanel({
           className="flex-1"
           placeholder="pessoa@exemplo.com"
         />
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" disabled={pending} className="inline-flex items-center gap-2">
+          <UserPlus size={16} strokeWidth={2} aria-hidden="true" />
           {pending ? "Enviando..." : "Enviar convite"}
         </Button>
         {erroConvite && <p className="text-sm text-danger sm:basis-full">{erroConvite}</p>}
@@ -88,7 +90,7 @@ export function AdministradoresPanel({
 
       <div className="overflow-x-auto rounded-2xl border border-border bg-white shadow-sm">
         <table className="w-full text-sm">
-          <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
+          <thead className="border-b border-border bg-cream/50 text-left text-xs uppercase tracking-wide text-muted">
             <tr>
               <th className="px-4 py-3">Email</th>
               <th className="px-4 py-3">Papel</th>
@@ -98,16 +100,24 @@ export function AdministradoresPanel({
           </thead>
           <tbody>
             {admins.map((admin) => (
-              <tr key={admin.userId} className="border-b border-border last:border-0">
-                <td className="px-4 py-3 font-medium text-ink">
-                  {admin.email}
-                  {admin.userId === currentUserId && (
-                    <span className="ml-2 text-xs text-muted">(você)</span>
-                  )}
+              <tr key={admin.userId} className="border-b border-border transition-colors last:border-0 hover:bg-cream/40">
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-charcoal/10 text-xs font-semibold text-charcoal">
+                      {admin.email.slice(0, 2).toUpperCase()}
+                    </span>
+                    <span className="font-medium text-ink">
+                      {admin.email}
+                      {admin.userId === currentUserId && (
+                        <span className="ml-2 text-xs font-normal text-muted">(você)</span>
+                      )}
+                    </span>
+                  </div>
                 </td>
                 <td className="px-4 py-3">
                   {admin.isSuperAdmin ? (
-                    <span className="rounded-full bg-orange/10 px-2 py-0.5 text-xs font-semibold text-orange">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-xs font-semibold text-orange">
+                      <ShieldCheck size={12} strokeWidth={2} aria-hidden="true" />
                       Super-admin
                     </span>
                   ) : (
@@ -119,21 +129,23 @@ export function AdministradoresPanel({
                 </td>
                 <td className="px-4 py-3">
                   {!admin.isSuperAdmin && (
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex flex-wrap gap-4">
                       <button
                         type="button"
                         onClick={() => setAlvoTransferir(admin)}
                         disabled={pending}
-                        className="text-orange hover:underline"
+                        className="inline-flex items-center gap-1.5 text-orange hover:underline"
                       >
+                        <ShieldCheck size={14} strokeWidth={1.75} aria-hidden="true" />
                         Tornar super-admin
                       </button>
                       <button
                         type="button"
                         onClick={() => setAlvoRevogar(admin)}
                         disabled={pending}
-                        className="text-danger hover:underline"
+                        className="inline-flex items-center gap-1.5 text-danger hover:underline"
                       >
+                        <UserX size={14} strokeWidth={1.75} aria-hidden="true" />
                         Revogar acesso
                       </button>
                     </div>

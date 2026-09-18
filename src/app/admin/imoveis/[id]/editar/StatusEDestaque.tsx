@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Star, Trash2 } from "lucide-react";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { STATUS_LABELS, type Imovel, type StatusImovel } from "@/lib/domain/types";
 import { deleteImovel, toggleDestaque, updateImovelStatus } from "../../actions";
@@ -55,21 +56,23 @@ export function StatusEDestaque({ imovel }: { imovel: Imovel }) {
           type="button"
           onClick={handleToggleDestaque}
           disabled={pending}
-          className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
+          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
             imovel.destaque
               ? "border-orange bg-orange/10 text-orange"
-              : "border-border text-muted"
+              : "border-border text-muted hover:border-orange/40"
           }`}
         >
-          {imovel.destaque ? "★ Em destaque" : "☆ Marcar como destaque"}
+          <Star size={14} strokeWidth={1.75} fill={imovel.destaque ? "currentColor" : "none"} aria-hidden="true" />
+          {imovel.destaque ? "Em destaque" : "Marcar como destaque"}
         </button>
       </div>
 
       <button
         type="button"
         onClick={() => setConfirmandoExclusao(true)}
-        className="text-sm text-danger hover:underline"
+        className="inline-flex items-center gap-1.5 text-sm text-danger hover:underline"
       >
+        <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />
         Excluir imóvel
       </button>
 

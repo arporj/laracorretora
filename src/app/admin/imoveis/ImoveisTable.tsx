@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Pencil, Trash2, Star, X } from "lucide-react";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { Input } from "@/components/Input";
 import { Select } from "@/components/Select";
@@ -127,7 +128,12 @@ export function ImoveisTable({ imoveis }: { imoveis: Imovel[] }) {
           ))}
         </Select>
         {filtrosAtivos && (
-          <button type="button" onClick={limparFiltros} className="text-sm text-muted hover:text-ink">
+          <button
+            type="button"
+            onClick={limparFiltros}
+            className="inline-flex items-center gap-1 text-sm text-muted hover:text-ink"
+          >
+            <X size={14} aria-hidden="true" />
             Limpar filtros
           </button>
         )}
@@ -140,7 +146,7 @@ export function ImoveisTable({ imoveis }: { imoveis: Imovel[] }) {
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-border bg-white shadow-sm">
           <table className="w-full text-sm">
-            <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
+            <thead className="border-b border-border bg-cream/50 text-left text-xs uppercase tracking-wide text-muted">
               <tr>
                 <th className="px-4 py-3">Código</th>
                 <th className="px-4 py-3">Título</th>
@@ -152,7 +158,7 @@ export function ImoveisTable({ imoveis }: { imoveis: Imovel[] }) {
             </thead>
             <tbody>
               {imoveisFiltrados.map((imovel) => (
-                <tr key={imovel.id} className="border-b border-border last:border-0">
+                <tr key={imovel.id} className="border-b border-border transition-colors last:border-0 hover:bg-cream/40">
                   <td className="px-4 py-3 text-muted">{imovel.codigo}</td>
                   <td className="px-4 py-3">
                     <Link
@@ -182,22 +188,36 @@ export function ImoveisTable({ imoveis }: { imoveis: Imovel[] }) {
                       type="button"
                       onClick={() => alternarDestaque(imovel)}
                       disabled={pending}
-                      className={imovel.destaque ? "text-orange" : "text-muted"}
+                      aria-pressed={imovel.destaque}
+                      aria-label={imovel.destaque ? "Remover destaque" : "Marcar como destaque"}
+                      title={imovel.destaque ? "Remover destaque" : "Marcar como destaque"}
+                      className={`rounded-lg p-1.5 transition-colors ${
+                        imovel.destaque ? "text-orange hover:bg-orange/10" : "text-border hover:bg-cream hover:text-muted"
+                      }`}
                     >
-                      {imovel.destaque ? "★ Sim" : "☆ Não"}
+                      <Star size={18} strokeWidth={1.75} fill={imovel.destaque ? "currentColor" : "none"} aria-hidden="true" />
                     </button>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link href={`/admin/imoveis/${imovel.id}/editar`} className="mr-3 text-orange hover:underline">
-                      Editar
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => setParaExcluir(imovel)}
-                      className="text-danger hover:underline"
-                    >
-                      Excluir
-                    </button>
+                    <div className="flex items-center justify-end gap-1">
+                      <Link
+                        href={`/admin/imoveis/${imovel.id}/editar`}
+                        aria-label="Editar imóvel"
+                        title="Editar"
+                        className="rounded-lg p-1.5 text-muted transition-colors hover:bg-orange/10 hover:text-orange"
+                      >
+                        <Pencil size={16} strokeWidth={1.75} aria-hidden="true" />
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => setParaExcluir(imovel)}
+                        aria-label="Excluir imóvel"
+                        title="Excluir"
+                        className="rounded-lg p-1.5 text-muted transition-colors hover:bg-danger/10 hover:text-danger"
+                      >
+                        <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

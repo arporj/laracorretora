@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft, Camera, ClipboardList } from "lucide-react";
 import { getImovelByIdComFotos } from "@/lib/domain/imoveis-repo";
 import { ImovelForm } from "../../ImovelForm";
 import { FotosUploader } from "../../FotosUploader";
@@ -23,8 +24,12 @@ export default async function EditarImovelPage({ params }: EditarImovelPageProps
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <Link href="/admin/imoveis" className="text-sm text-muted transition-colors hover:text-orange">
-          ← Imóveis
+        <Link
+          href="/admin/imoveis"
+          className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-orange"
+        >
+          <ArrowLeft size={14} aria-hidden="true" />
+          Imóveis
         </Link>
         <h1 className="font-display mt-1 mb-1 text-3xl font-semibold text-ink">{imovel.titulo}</h1>
         <p className="text-sm text-muted">{imovel.codigo}</p>
@@ -33,12 +38,18 @@ export default async function EditarImovelPage({ params }: EditarImovelPageProps
       <StatusEDestaque imovel={imovel} />
 
       <section>
-        <h2 className="font-display mb-3 text-lg text-ink">Fotos</h2>
+        <h2 className="font-display mb-3 flex items-center gap-2 text-lg text-ink">
+          <Camera size={18} strokeWidth={1.75} className="text-orange" aria-hidden="true" />
+          Fotos
+        </h2>
         <FotosUploader imovelId={imovel.id} fotos={imovel.imovel_fotos} />
       </section>
 
       <section>
-        <h2 className="font-display mb-3 text-lg text-ink">Dados do imóvel</h2>
+        <h2 className="font-display mb-3 flex items-center gap-2 text-lg text-ink">
+          <ClipboardList size={18} strokeWidth={1.75} className="text-orange" aria-hidden="true" />
+          Dados do imóvel
+        </h2>
         <ImovelForm action={updateImovelAction} imovel={imovel} submitLabel="Salvar alterações" />
       </section>
     </div>

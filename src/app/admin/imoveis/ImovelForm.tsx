@@ -2,6 +2,15 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Info,
+  Wallet,
+  Ruler,
+  ListChecks,
+  MapPin,
+  Save,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/Button";
 import { Input, Textarea } from "@/components/Input";
 import { Select } from "@/components/Select";
@@ -15,6 +24,15 @@ interface ImovelFormProps {
   action: (formData: FormData) => Promise<ImovelActionResultado>;
   imovel?: Imovel;
   submitLabel?: string;
+}
+
+function SectionTitle({ icon: Icon, children }: { icon: LucideIcon; children: React.ReactNode }) {
+  return (
+    <h2 className="font-display mb-4 flex items-center gap-2 text-lg text-ink">
+      <Icon size={18} strokeWidth={1.75} className="text-orange" aria-hidden="true" />
+      {children}
+    </h2>
+  );
 }
 
 export function ImovelForm({ action, imovel, submitLabel = "Salvar" }: ImovelFormProps) {
@@ -41,7 +59,7 @@ export function ImovelForm({ action, imovel, submitLabel = "Salvar" }: ImovelFor
   return (
     <form action={handleSubmit} className="flex flex-col gap-6">
       <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-        <h2 className="font-display mb-4 text-lg text-ink">Informações básicas</h2>
+        <SectionTitle icon={Info}>Informações básicas</SectionTitle>
         <div className="grid gap-4 sm:grid-cols-2">
           <Input label="Título" name="titulo" required defaultValue={imovel?.titulo} className="sm:col-span-2" />
           <Select
@@ -74,7 +92,7 @@ export function ImovelForm({ action, imovel, submitLabel = "Salvar" }: ImovelFor
       </section>
 
       <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-        <h2 className="font-display mb-4 text-lg text-ink">Valores</h2>
+        <SectionTitle icon={Wallet}>Valores</SectionTitle>
         <div className="grid gap-4 sm:grid-cols-4">
           {mostrarVenda && (
             <Input
@@ -116,7 +134,7 @@ export function ImovelForm({ action, imovel, submitLabel = "Salvar" }: ImovelFor
       </section>
 
       <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-        <h2 className="font-display mb-4 text-lg text-ink">Características</h2>
+        <SectionTitle icon={Ruler}>Características</SectionTitle>
         <div className="grid gap-4 sm:grid-cols-6">
           <Input label="Área total (m²)" name="area_total" type="number" step="0.01" min="0" defaultValue={imovel?.area_total ?? ""} />
           <Input label="Área construída (m²)" name="area_construida" type="number" step="0.01" min="0" defaultValue={imovel?.area_construida ?? ""} />
@@ -128,7 +146,7 @@ export function ImovelForm({ action, imovel, submitLabel = "Salvar" }: ImovelFor
       </section>
 
       <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-        <h2 className="font-display mb-4 text-lg text-ink">Comodidades</h2>
+        <SectionTitle icon={ListChecks}>Comodidades</SectionTitle>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {COMODIDADES.map((c) => (
             <label
@@ -149,13 +167,14 @@ export function ImovelForm({ action, imovel, submitLabel = "Salvar" }: ImovelFor
       </section>
 
       <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
-        <h2 className="font-display mb-4 text-lg text-ink">Endereço</h2>
+        <SectionTitle icon={MapPin}>Endereço</SectionTitle>
         <EnderecoFields imovel={imovel} />
       </section>
 
       {erro && <p className="text-sm text-danger">{erro}</p>}
 
-      <Button type="submit" disabled={pending} className="self-start">
+      <Button type="submit" disabled={pending} className="inline-flex items-center gap-2 self-start">
+        <Save size={16} strokeWidth={2} aria-hidden="true" />
         {pending ? "Salvando..." : submitLabel}
       </Button>
     </form>

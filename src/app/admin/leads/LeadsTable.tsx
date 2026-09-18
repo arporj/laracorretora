@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { MessageCircle, ExternalLink } from "lucide-react";
 import { StatusLeadBadge } from "@/components/admin/StatusBadge";
 import { LEAD_STATUS_LABELS, type Lead, type StatusLead } from "@/lib/domain/types";
 import { buildWhatsAppLinkPara } from "@/lib/whatsapp";
@@ -31,7 +32,7 @@ export function LeadsTable({ leads }: { leads: LeadComImovel[] }) {
   return (
     <div className="overflow-x-auto rounded-2xl border border-border bg-white shadow-sm">
       <table className="w-full text-sm">
-        <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
+        <thead className="border-b border-border bg-cream/50 text-left text-xs uppercase tracking-wide text-muted">
           <tr>
             <th className="px-4 py-3">Data</th>
             <th className="px-4 py-3">Nome</th>
@@ -43,7 +44,7 @@ export function LeadsTable({ leads }: { leads: LeadComImovel[] }) {
         </thead>
         <tbody>
           {leads.map((lead) => (
-            <tr key={lead.id} className="border-b border-border align-top last:border-0">
+            <tr key={lead.id} className="border-b border-border align-top transition-colors last:border-0 hover:bg-cream/40">
               <td className="whitespace-nowrap px-4 py-3 text-muted">
                 {new Date(lead.created_at).toLocaleDateString("pt-BR")}
               </td>
@@ -56,16 +57,21 @@ export function LeadsTable({ leads }: { leads: LeadComImovel[] }) {
                   )}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-success hover:underline"
+                  className="inline-flex items-center gap-1.5 text-success hover:underline"
                 >
+                  <MessageCircle size={14} strokeWidth={1.75} aria-hidden="true" />
                   {lead.telefone}
                 </a>
-                {lead.email && <div className="text-xs text-muted">{lead.email}</div>}
+                {lead.email && <div className="mt-0.5 text-xs text-muted">{lead.email}</div>}
               </td>
               <td className="px-4 py-3">
                 {lead.imoveis ? (
-                  <a href={`/imoveis/${lead.imoveis.slug}`} className="text-orange hover:underline">
+                  <a
+                    href={`/imoveis/${lead.imoveis.slug}`}
+                    className="inline-flex items-center gap-1 text-orange hover:underline"
+                  >
                     {lead.imoveis.codigo}
+                    <ExternalLink size={12} strokeWidth={1.75} aria-hidden="true" />
                   </a>
                 ) : (
                   <span className="text-muted">Contato geral</span>
