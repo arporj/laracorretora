@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Galeria } from "@/components/public/Galeria";
 import { ContatoForm } from "@/components/public/ContatoForm";
@@ -46,18 +47,22 @@ export default async function ImovelDetalhePage({ params }: ImovelDetalhePagePro
   const enviarContatoAction = enviarContatoImovel.bind(null, imovel.id);
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-10">
+    <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+      <Link href="/imoveis" className="mb-6 inline-block text-sm text-muted transition-colors hover:text-orange">
+        ← Voltar para imóveis
+      </Link>
+
       <div className="grid gap-10 lg:grid-cols-[1.6fr_1fr]">
         <div>
           <Galeria fotos={imovel.imovel_fotos} titulo={imovel.titulo} />
 
-          <div className="mt-6">
-            <span className="text-xs font-semibold uppercase tracking-wide text-orange">
+          <div className="mt-8">
+            <span className="eyebrow text-orange">
               {TIPO_LABELS[imovel.tipo]} · {FINALIDADE_LABELS[imovel.finalidade]}
               {imovel.status !== "disponivel" && ` · ${STATUS_LABELS[imovel.status]}`}
             </span>
-            <h1 className="mt-1 text-2xl font-bold text-ink">{imovel.titulo}</h1>
-            <p className="mt-1 text-muted">
+            <h1 className="font-display mt-2 text-3xl font-semibold text-ink">{imovel.titulo}</h1>
+            <p className="mt-2 text-muted">
               {[imovel.endereco_bairro, imovel.endereco_cidade, imovel.endereco_estado]
                 .filter(Boolean)
                 .join(", ")}
@@ -66,30 +71,30 @@ export default async function ImovelDetalhePage({ params }: ImovelDetalhePagePro
             </p>
 
             {specs.length > 0 && (
-              <div className="mt-6 grid grid-cols-2 gap-4 rounded-2xl border border-border bg-white p-4 sm:grid-cols-3">
+              <div className="mt-8 grid grid-cols-2 gap-6 rounded-2xl border border-border bg-white p-6 sm:grid-cols-3">
                 {specs.map((spec) => (
                   <div key={spec.label}>
-                    <div className="text-xs text-muted">{spec.label}</div>
-                    <div className="font-semibold text-ink">{spec.value}</div>
+                    <div className="eyebrow text-muted">{spec.label}</div>
+                    <div className="font-display mt-1 text-lg text-ink">{spec.value}</div>
                   </div>
                 ))}
               </div>
             )}
 
             {imovel.descricao && (
-              <p className="mt-6 whitespace-pre-line leading-relaxed text-ink">
+              <p className="mt-8 whitespace-pre-line leading-relaxed text-ink">
                 {imovel.descricao}
               </p>
             )}
 
             {imovel.comodidades.length > 0 && (
-              <div className="mt-6">
-                <h2 className="mb-3 font-semibold text-ink">Comodidades</h2>
+              <div className="mt-8">
+                <h2 className="font-display mb-3 text-lg text-ink">Comodidades</h2>
                 <ul className="flex flex-wrap gap-2">
                   {imovel.comodidades.map((c) => (
                     <li
                       key={c}
-                      className="rounded-full border border-border bg-white px-3 py-1 text-sm text-ink"
+                      className="rounded-full border border-border bg-white px-3 py-1.5 text-sm text-ink"
                     >
                       {COMODIDADE_LABELS[c] ?? c}
                     </li>
@@ -100,21 +105,21 @@ export default async function ImovelDetalhePage({ params }: ImovelDetalhePagePro
           </div>
         </div>
 
-        <aside className="flex flex-col gap-6">
-          <div className="rounded-2xl border border-border bg-white p-5">
+        <aside className="flex flex-col gap-6 lg:sticky lg:top-24 lg:self-start">
+          <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
             {imovel.finalidade !== "aluguel" && (
-              <div className="text-2xl font-bold text-ink">
+              <div className="font-display text-2xl font-semibold text-ink">
                 {formatCentsToBRL(imovel.preco_venda_cents)}
               </div>
             )}
             {imovel.finalidade !== "venda" && (
-              <div className="text-lg font-semibold text-ink">
+              <div className="font-display text-lg font-semibold text-ink">
                 {formatCentsToBRL(imovel.preco_aluguel_cents)}
-                <span className="text-sm font-normal text-muted"> /mês</span>
+                <span className="font-sans text-sm font-normal text-muted"> /mês</span>
               </div>
             )}
             {(imovel.condominio_cents || imovel.iptu_cents) && (
-              <div className="mt-2 space-y-1 text-sm text-muted">
+              <div className="mt-3 space-y-1 border-t border-border pt-3 text-sm text-muted">
                 {imovel.condominio_cents != null && (
                   <div>Condomínio: {formatCentsToBRL(imovel.condominio_cents)}</div>
                 )}
@@ -128,14 +133,14 @@ export default async function ImovelDetalhePage({ params }: ImovelDetalhePagePro
               href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-success px-5 py-3 font-semibold text-white hover:opacity-90"
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-success px-5 py-3 font-semibold text-white transition-opacity hover:opacity-90"
             >
               Falar no WhatsApp
             </a>
           </div>
 
-          <div className="rounded-2xl border border-border bg-white p-5">
-            <h2 className="mb-4 font-semibold text-ink">Tenho interesse</h2>
+          <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+            <h2 className="font-display mb-4 text-lg text-ink">Tenho interesse</h2>
             <ContatoForm action={enviarContatoAction} />
           </div>
         </aside>

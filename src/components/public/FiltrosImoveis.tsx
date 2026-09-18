@@ -13,14 +13,14 @@ export function FiltrosImoveis({
     <form
       action="/imoveis"
       method="get"
-      className="flex flex-col gap-3 rounded-2xl border border-border bg-white p-4 sm:flex-row sm:items-end"
+      className="flex flex-col gap-3 rounded-2xl border border-border bg-white p-4 shadow-sm sm:flex-row sm:items-end"
     >
       <label className="flex flex-1 flex-col gap-1 text-sm text-ink">
         <span className="font-medium">Pretensão</span>
         <select
           name="finalidade"
           defaultValue={finalidade ?? ""}
-          className="rounded-lg border border-border px-3 py-2 outline-none focus:border-orange"
+          className="rounded-lg border border-border px-3 py-2.5 outline-none focus:border-orange focus:ring-2 focus:ring-orange/20"
         >
           <option value="">Comprar ou Alugar</option>
           <option value="venda">Comprar</option>
@@ -33,7 +33,7 @@ export function FiltrosImoveis({
         <select
           name="tipo"
           defaultValue={tipo ?? ""}
-          className="rounded-lg border border-border px-3 py-2 outline-none focus:border-orange"
+          className="rounded-lg border border-border px-3 py-2.5 outline-none focus:border-orange focus:ring-2 focus:ring-orange/20"
         >
           <option value="">Todos os tipos</option>
           <option value="apartamento">Apartamento</option>
@@ -52,7 +52,7 @@ export function FiltrosImoveis({
           name="q"
           defaultValue={q ?? ""}
           placeholder="Bairro, cidade ou código (ex: LF-1001)"
-          className="rounded-lg border border-border px-3 py-2 outline-none focus:border-orange"
+          className="rounded-lg border border-border px-3 py-2.5 outline-none focus:border-orange focus:ring-2 focus:ring-orange/20"
         />
       </label>
 

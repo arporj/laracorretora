@@ -28,8 +28,12 @@ export function ContatoForm({
 
   if (resultado?.ok) {
     return (
-      <div className="rounded-2xl border border-success/30 bg-success/10 p-6 text-success">
-        Mensagem enviada! A Lara vai entrar em contato em breve.
+      <div className="fade-in flex items-start gap-3 rounded-2xl border border-success/30 bg-success/10 p-6 text-success">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="mt-0.5 shrink-0" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
+          <path d="m8 12.5 2.5 2.5L16 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <span>Mensagem enviada! A Lara vai entrar em contato em breve.</span>
       </div>
     );
   }

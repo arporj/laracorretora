@@ -14,7 +14,7 @@ export function ImovelCard({ imovel }: { imovel: ImovelComFotos }) {
   return (
     <Link
       href={`/imoveis/${imovel.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-sm transition-shadow hover:shadow-md"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-border/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-cream">
         {capa ? (
@@ -22,7 +22,7 @@ export function ImovelCard({ imovel }: { imovel: ImovelComFotos }) {
           <img
             src={capa.url}
             alt={imovel.titulo}
-            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-muted">
@@ -30,40 +30,26 @@ export function ImovelCard({ imovel }: { imovel: ImovelComFotos }) {
           </div>
         )}
         {imovel.destaque && (
-          <span className="absolute left-3 top-3 rounded-full bg-orange px-3 py-1 text-xs font-semibold text-white">
+          <span className="eyebrow absolute left-3 top-3 rounded-full bg-orange px-3 py-1 text-white">
             Destaque
           </span>
         )}
         {naoDisponivel && (
-          <span className="absolute right-3 top-3 rounded-full bg-charcoal px-3 py-1 text-xs font-semibold text-white">
+          <span className="eyebrow absolute right-3 top-3 rounded-full bg-charcoal px-3 py-1 text-white">
             {STATUS_LABELS[imovel.status]}
           </span>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 p-4">
-        <span className="text-xs font-semibold uppercase tracking-wide text-orange">
+      <div className="flex flex-1 flex-col gap-2 p-5">
+        <span className="eyebrow text-orange">
           {TIPO_LABELS[imovel.tipo]} · {FINALIDADE_LABELS[imovel.finalidade]}
         </span>
-        <h3 className="font-semibold text-ink">{imovel.titulo}</h3>
+        <h3 className="font-display text-lg font-medium text-ink">{imovel.titulo}</h3>
         <p className="text-sm text-muted">
           {imovel.endereco_bairro ? `${imovel.endereco_bairro}, ` : ""}
           {imovel.endereco_cidade}
         </p>
-
-        <div className="mt-auto flex items-center justify-between pt-2">
-          <div className="text-sm font-bold text-ink">
-            {imovel.finalidade !== "aluguel" && formatCentsToBRL(imovel.preco_venda_cents)}
-            {imovel.finalidade === "venda_aluguel" && " · "}
-            {imovel.finalidade !== "venda" && (
-              <>
-                {formatCentsToBRL(imovel.preco_aluguel_cents)}
-                <span className="font-normal text-muted">/mês</span>
-              </>
-            )}
-          </div>
-          <span className="text-xs text-muted">{imovel.codigo}</span>
-        </div>
 
         {(imovel.quartos != null || imovel.vagas != null || imovel.area_total != null) && (
           <div className="flex gap-3 text-xs text-muted">
@@ -72,6 +58,20 @@ export function ImovelCard({ imovel }: { imovel: ImovelComFotos }) {
             {imovel.vagas != null && <span>{imovel.vagas} vagas</span>}
           </div>
         )}
+
+        <div className="mt-auto flex items-end justify-between border-t border-border pt-3">
+          <div className="font-display text-base font-semibold text-ink">
+            {imovel.finalidade !== "aluguel" && formatCentsToBRL(imovel.preco_venda_cents)}
+            {imovel.finalidade === "venda_aluguel" && " · "}
+            {imovel.finalidade !== "venda" && (
+              <>
+                {formatCentsToBRL(imovel.preco_aluguel_cents)}
+                <span className="font-sans text-sm font-normal text-muted">/mês</span>
+              </>
+            )}
+          </div>
+          <span className="text-xs text-muted">{imovel.codigo}</span>
+        </div>
       </div>
     </Link>
   );
