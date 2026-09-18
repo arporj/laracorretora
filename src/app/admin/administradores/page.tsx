@@ -17,7 +17,8 @@ export default async function AdministradoresPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-ink">Administradores</h1>
+      <span className="eyebrow text-orange">Acesso</span>
+      <h1 className="font-display mt-1 mb-8 text-3xl font-semibold text-ink">Administradores</h1>
       <AdministradoresPanel admins={admins} currentUserId={admin.id} />
     </div>
   );

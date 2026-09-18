@@ -79,7 +79,7 @@ export function ImoveisTable({ imoveis }: { imoveis: Imovel[] }) {
 
   return (
     <>
-      <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-border bg-white p-4 sm:flex-row sm:flex-wrap sm:items-end">
+      <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-border bg-white p-4 shadow-sm sm:flex-row sm:flex-wrap sm:items-end">
         <Input
           label="Buscar"
           value={busca}
@@ -138,9 +138,9 @@ export function ImoveisTable({ imoveis }: { imoveis: Imovel[] }) {
           Nenhum imóvel encontrado com esses filtros.
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-border bg-white">
+        <div className="overflow-x-auto rounded-2xl border border-border bg-white shadow-sm">
           <table className="w-full text-sm">
-            <thead className="border-b border-border text-left text-xs uppercase text-muted">
+            <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
               <tr>
                 <th className="px-4 py-3">Código</th>
                 <th className="px-4 py-3">Título</th>

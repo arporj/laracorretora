@@ -6,10 +6,10 @@ export default function NovoImovelPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <Link href="/admin/imoveis" className="text-sm text-muted hover:text-ink">
+        <Link href="/admin/imoveis" className="text-sm text-muted transition-colors hover:text-orange">
           ← Imóveis
         </Link>
-        <h1 className="mt-1 text-2xl font-bold text-ink">Novo imóvel</h1>
+        <h1 className="font-display mt-1 text-3xl font-semibold text-ink">Novo imóvel</h1>
       </div>
 
       <div className="rounded-2xl border border-border bg-cream/60 p-4 text-sm text-muted">

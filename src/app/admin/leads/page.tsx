@@ -6,9 +6,12 @@ export default async function AdminLeadsPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-ink">Leads</h1>
+      <span className="eyebrow text-orange">Relacionamento</span>
+      <h1 className="font-display mt-1 mb-8 text-3xl font-semibold text-ink">Leads</h1>
       {leads.length === 0 ? (
-        <p className="text-muted">Nenhum contato recebido ainda.</p>
+        <p className="rounded-2xl border border-dashed border-border bg-white p-10 text-center text-muted">
+          Nenhum contato recebido ainda.
+        </p>
       ) : (
         <LeadsTable leads={leads} />
       )}

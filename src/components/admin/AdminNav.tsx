@@ -16,11 +16,14 @@ export function AdminNav({ isSuperAdmin = false }: { isSuperAdmin?: boolean }) {
     : LINKS;
 
   return (
-    <header className="border-b border-border bg-charcoal text-white">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-6">
-          <span className="font-bold">LARA · Admin</span>
-          <nav className="flex gap-4 text-sm">
+    <header className="border-b border-white/10 bg-charcoal text-white">
+      <div className="rule-gold" aria-hidden="true" />
+      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
+        <div className="flex items-center gap-8">
+          <span className="font-display text-lg font-semibold">
+            Lara <span className="eyebrow ml-1 text-gold-soft">Admin</span>
+          </span>
+          <nav className="flex gap-5 text-sm">
             {links.map((link) => {
               const active =
                 link.href === "/admin" ? pathname === link.href : pathname.startsWith(link.href);
@@ -28,7 +31,7 @@ export function AdminNav({ isSuperAdmin = false }: { isSuperAdmin?: boolean }) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={active ? "text-orange" : "text-white/70 hover:text-white"}
+                  className={`transition-colors ${active ? "text-orange" : "text-white/70 hover:text-white"}`}
                 >
                   {link.label}
                 </Link>
@@ -37,7 +40,7 @@ export function AdminNav({ isSuperAdmin = false }: { isSuperAdmin?: boolean }) {
           </nav>
         </div>
         <form action="/auth/signout" method="post">
-          <button type="submit" className="text-sm text-white/70 hover:text-white">
+          <button type="submit" className="text-sm text-white/70 transition-colors hover:text-white">
             Sair
           </button>
         </form>

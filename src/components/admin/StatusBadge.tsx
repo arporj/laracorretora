@@ -15,7 +15,8 @@ const LEAD_COLORS: Record<StatusLead, string> = {
 
 export function StatusImovelBadge({ status }: { status: StatusImovel }) {
   return (
-    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${IMOVEL_COLORS[status]}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${IMOVEL_COLORS[status]}`}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
       {STATUS_LABELS[status]}
     </span>
   );
@@ -23,7 +24,8 @@ export function StatusImovelBadge({ status }: { status: StatusImovel }) {
 
 export function StatusLeadBadge({ status }: { status: StatusLead }) {
   return (
-    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${LEAD_COLORS[status]}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${LEAD_COLORS[status]}`}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
       {LEAD_STATUS_LABELS[status]}
     </span>
   );

@@ -29,9 +29,9 @@ export function LeadsTable({ leads }: { leads: LeadComImovel[] }) {
   }
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-border bg-white">
+    <div className="overflow-x-auto rounded-2xl border border-border bg-white shadow-sm">
       <table className="w-full text-sm">
-        <thead className="border-b border-border text-left text-xs uppercase text-muted">
+        <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
           <tr>
             <th className="px-4 py-3">Data</th>
             <th className="px-4 py-3">Nome</th>

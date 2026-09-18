@@ -33,7 +33,7 @@ export function StatusEDestaque({ imovel }: { imovel: Imovel }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-white p-4">
+    <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-center gap-4">
         <label className="flex items-center gap-2 text-sm">
           <span className="font-medium text-ink">Status</span>

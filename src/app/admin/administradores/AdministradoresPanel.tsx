@@ -63,7 +63,7 @@ export function AdministradoresPanel({
     <div className="flex flex-col gap-6">
       <form
         action={handleConvidar}
-        className="flex flex-col gap-3 rounded-2xl border border-border bg-white p-4 sm:flex-row sm:items-end"
+        className="flex flex-col gap-3 rounded-2xl border border-border bg-white p-4 shadow-sm sm:flex-row sm:items-end"
       >
         <Input
           label="Convidar novo admin (email)"
@@ -86,9 +86,9 @@ export function AdministradoresPanel({
 
       {erroAcao && <p className="text-sm text-danger">{erroAcao}</p>}
 
-      <div className="overflow-x-auto rounded-2xl border border-border bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-border bg-white shadow-sm">
         <table className="w-full text-sm">
-          <thead className="border-b border-border text-left text-xs uppercase text-muted">
+          <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">
             <tr>
               <th className="px-4 py-3">Email</th>
               <th className="px-4 py-3">Papel</th>

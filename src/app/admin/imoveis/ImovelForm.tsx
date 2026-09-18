@@ -40,8 +40,8 @@ export function ImovelForm({ action, imovel, submitLabel = "Salvar" }: ImovelFor
 
   return (
     <form action={handleSubmit} className="flex flex-col gap-6">
-      <section className="rounded-2xl border border-border bg-white p-6">
-        <h2 className="mb-4 font-semibold text-ink">Informações básicas</h2>
+      <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+        <h2 className="font-display mb-4 text-lg text-ink">Informações básicas</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Input label="Título" name="titulo" required defaultValue={imovel?.titulo} className="sm:col-span-2" />
           <Select
@@ -73,8 +73,8 @@ export function ImovelForm({ action, imovel, submitLabel = "Salvar" }: ImovelFor
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border bg-white p-6">
-        <h2 className="mb-4 font-semibold text-ink">Valores</h2>
+      <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+        <h2 className="font-display mb-4 text-lg text-ink">Valores</h2>
         <div className="grid gap-4 sm:grid-cols-4">
           {mostrarVenda && (
             <Input
@@ -115,8 +115,8 @@ export function ImovelForm({ action, imovel, submitLabel = "Salvar" }: ImovelFor
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border bg-white p-6">
-        <h2 className="mb-4 font-semibold text-ink">Características</h2>
+      <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+        <h2 className="font-display mb-4 text-lg text-ink">Características</h2>
         <div className="grid gap-4 sm:grid-cols-6">
           <Input label="Área total (m²)" name="area_total" type="number" step="0.01" min="0" defaultValue={imovel?.area_total ?? ""} />
           <Input label="Área construída (m²)" name="area_construida" type="number" step="0.01" min="0" defaultValue={imovel?.area_construida ?? ""} />
@@ -127,8 +127,8 @@ export function ImovelForm({ action, imovel, submitLabel = "Salvar" }: ImovelFor
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border bg-white p-6">
-        <h2 className="mb-4 font-semibold text-ink">Comodidades</h2>
+      <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+        <h2 className="font-display mb-4 text-lg text-ink">Comodidades</h2>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {COMODIDADES.map((c) => (
             <label
@@ -148,8 +148,8 @@ export function ImovelForm({ action, imovel, submitLabel = "Salvar" }: ImovelFor
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border bg-white p-6">
-        <h2 className="mb-4 font-semibold text-ink">Endereço</h2>
+      <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+        <h2 className="font-display mb-4 text-lg text-ink">Endereço</h2>
         <EnderecoFields imovel={imovel} />
       </section>
 
