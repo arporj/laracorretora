@@ -46,3 +46,25 @@ Em **Project Settings → API**, copie:
 - `service_role` key → `SUPABASE_SERVICE_ROLE_KEY` (nunca expor no cliente)
 
 Cole tudo em `.env.local` (veja `.env.example`).
+
+## 6. Configurar envio de e-mail (Resend)
+
+O convite de admin (e qualquer outro e-mail que o site vier a mandar) é
+enviado via [Resend](https://resend.com), não pelo mailer padrão do Supabase
+— isso garante layout próprio e envio a partir do domínio do site.
+
+1. Crie uma conta em resend.com e adicione o domínio do site (ex:
+   `laranegociosimobiliarios.com.br`) em **Domains → Add Domain**.
+2. Adicione os registros DNS (SPF, DKIM, e opcionalmente MX) que o Resend
+   pedir, no provedor onde o domínio está registrado. A verificação pode
+   levar alguns minutos a algumas horas.
+3. Em **API Keys**, gere uma chave e coloque em `RESEND_API_KEY`.
+4. Defina `EMAIL_FROM` com um endereço nesse domínio verificado, ex:
+   `"LARA Negócios Imobiliários <no-reply@laranegociosimobiliarios.com.br>"`.
+5. Garanta que `NEXT_PUBLIC_SITE_URL` em produção aponta para o domínio real
+   (ex: `https://www.laranegociosimobiliarios.com.br`) — ele é usado no link
+   de redirecionamento do convite.
+
+Sem isso configurado (localmente ou em produção), `convidarAdmin` cadastra
+e depois desfaz o cadastro automaticamente se o e-mail não puder ser
+enviado — então nada fica com acesso concedido sem saber.

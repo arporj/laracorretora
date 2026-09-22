@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { requireSuperAdmin } from "@/lib/auth/require-auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isMockMode } from "@/lib/mock/config";
+import { enviarEmail } from "@/lib/email/send";
+import { adminInviteEmail } from "@/lib/email/templates/admin-invite";
 
 export type AdminActionResultado = { ok: true } | { ok: false; erro: string };
 
@@ -23,12 +25,17 @@ export async function convidarAdmin(formData: FormData): Promise<AdminActionResu
 
   const admin = createAdminClient();
 
-  const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
+  // Geramos o link nós mesmos (em vez de `inviteUserByEmail`) pra poder
+  // mandar o e-mail com o layout e o domínio remetente do site, via Resend,
+  // em vez do e-mail padrão do Supabase Auth.
+  const { data, error } = await admin.auth.admin.generateLink({
+    type: "invite",
+    email,
+    options: { redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/login` },
   });
 
   if (error || !data.user) {
-    console.error("Erro ao convidar admin:", error);
+    console.error("Erro ao gerar convite de admin:", error);
     const jaExiste = error?.code === "email_exists";
     return {
       ok: false,
@@ -45,6 +52,18 @@ export async function convidarAdmin(formData: FormData): Promise<AdminActionResu
     // Desfaz o convite pra não deixar um usuário órfão sem acesso nem registro.
     await admin.auth.admin.deleteUser(data.user.id);
     return { ok: false, erro: "Não foi possível cadastrar o admin." };
+  }
+
+  const { subject, html, text } = adminInviteEmail({ inviteLink: data.properties.action_link });
+  const envio = await enviarEmail({ to: email, subject, html, text });
+
+  if (!envio.ok) {
+    console.error("Erro ao enviar email de convite:", envio.erro);
+    // O admin já foi cadastrado; desfazemos tudo pra não deixar acesso
+    // concedido sem a pessoa ter como saber ou ativar a própria senha.
+    await admin.from("admins").delete().eq("user_id", data.user.id);
+    await admin.auth.admin.deleteUser(data.user.id);
+    return { ok: false, erro: "Admin cadastrado, mas não foi possível enviar o email de convite." };
   }
 
   revalidatePath("/admin/administradores");

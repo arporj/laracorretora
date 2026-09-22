@@ -4,11 +4,13 @@ const { requireSuperAdmin } = vi.hoisted(() => ({ requireSuperAdmin: vi.fn() }))
 const { createAdminClient } = vi.hoisted(() => ({ createAdminClient: vi.fn() }));
 const { isMockMode } = vi.hoisted(() => ({ isMockMode: vi.fn() }));
 const { revalidatePath } = vi.hoisted(() => ({ revalidatePath: vi.fn() }));
+const { enviarEmail } = vi.hoisted(() => ({ enviarEmail: vi.fn() }));
 
 vi.mock("@/lib/auth/require-auth", () => ({ requireSuperAdmin }));
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient }));
 vi.mock("@/lib/mock/config", () => ({ isMockMode }));
 vi.mock("next/cache", () => ({ revalidatePath }));
+vi.mock("@/lib/email/send", () => ({ enviarEmail }));
 
 function makeQueryBuilder(finalResult: unknown) {
   const builder: Record<string, unknown> = {};
@@ -21,14 +23,17 @@ function makeQueryBuilder(finalResult: unknown) {
 }
 
 function makeAdminClient(opts: {
-  invite?: { data: { user: { id: string } | null }; error: { code?: string } | null };
+  invite?: {
+    data: { user: { id: string } | null; properties?: { action_link: string } | null };
+    error: { code?: string } | null;
+  };
   insert?: { error: unknown };
   deleteResult?: { error: unknown; count: number | null };
   rpc?: { error: unknown };
 } = {}) {
-  const inviteUserByEmail = vi
+  const generateLink = vi
     .fn()
-    .mockResolvedValue(opts.invite ?? { data: { user: null }, error: null });
+    .mockResolvedValue(opts.invite ?? { data: { user: null, properties: null }, error: null });
   const deleteUser = vi.fn().mockResolvedValue({ error: null });
   const insert = vi.fn().mockResolvedValue(opts.insert ?? { error: null });
   const deleteFn = vi.fn(() => makeQueryBuilder(opts.deleteResult ?? { error: null, count: 1 }));
@@ -36,11 +41,11 @@ function makeAdminClient(opts: {
 
   return {
     client: {
-      auth: { admin: { inviteUserByEmail, deleteUser } },
+      auth: { admin: { generateLink, deleteUser } },
       from: vi.fn(() => ({ insert, delete: deleteFn })),
       rpc,
     },
-    inviteUserByEmail,
+    generateLink,
     deleteUser,
     insert,
     deleteFn,
@@ -52,6 +57,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   requireSuperAdmin.mockResolvedValue({ id: "super-1", isSuperAdmin: true });
   isMockMode.mockReturnValue(false);
+  enviarEmail.mockResolvedValue({ ok: true });
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
 
@@ -66,7 +72,7 @@ describe("convidarAdmin", () => {
 
     const res = await convidarAdmin(formData);
     expect(res).toEqual({ ok: false, erro: "Informe um email válido." });
-    expect(fake.inviteUserByEmail).not.toHaveBeenCalled();
+    expect(fake.generateLink).not.toHaveBeenCalled();
   });
 
   it("modo demonstração: retorna erro amigável sem chamar o Supabase", async () => {
@@ -80,12 +86,15 @@ describe("convidarAdmin", () => {
 
     const res = await convidarAdmin(formData);
     expect(res.ok).toBe(false);
-    expect(fake.inviteUserByEmail).not.toHaveBeenCalled();
+    expect(fake.generateLink).not.toHaveBeenCalled();
   });
 
-  it("convida com sucesso e cadastra o admin", async () => {
+  it("convida com sucesso, cadastra o admin e envia o email", async () => {
     const fake = makeAdminClient({
-      invite: { data: { user: { id: "new-user" } }, error: null },
+      invite: {
+        data: { user: { id: "new-user" }, properties: { action_link: "https://link" } },
+        error: null,
+      },
       insert: { error: null },
     });
     createAdminClient.mockReturnValue(fake.client);
@@ -97,12 +106,15 @@ describe("convidarAdmin", () => {
     const res = await convidarAdmin(formData);
     expect(res).toEqual({ ok: true });
     expect(fake.insert).toHaveBeenCalledWith({ user_id: "new-user" });
+    expect(enviarEmail).toHaveBeenCalledWith(
+      expect.objectContaining({ to: "novo@exemplo.com" }),
+    );
     expect(revalidatePath).toHaveBeenCalledWith("/admin/administradores");
   });
 
   it("email já existente retorna mensagem específica", async () => {
     const fake = makeAdminClient({
-      invite: { data: { user: null }, error: { code: "email_exists" } },
+      invite: { data: { user: null, properties: null }, error: { code: "email_exists" } },
     });
     createAdminClient.mockReturnValue(fake.client);
 
@@ -116,7 +128,10 @@ describe("convidarAdmin", () => {
 
   it("desfaz o convite se o insert em `admins` falhar", async () => {
     const fake = makeAdminClient({
-      invite: { data: { user: { id: "new-user" } }, error: null },
+      invite: {
+        data: { user: { id: "new-user" }, properties: { action_link: "https://link" } },
+        error: null,
+      },
       insert: { error: new Error("boom") },
     });
     createAdminClient.mockReturnValue(fake.client);
@@ -127,6 +142,28 @@ describe("convidarAdmin", () => {
 
     const res = await convidarAdmin(formData);
     expect(res.ok).toBe(false);
+    expect(fake.deleteUser).toHaveBeenCalledWith("new-user");
+    expect(enviarEmail).not.toHaveBeenCalled();
+  });
+
+  it("desfaz o cadastro se o envio do email falhar", async () => {
+    const fake = makeAdminClient({
+      invite: {
+        data: { user: { id: "new-user" }, properties: { action_link: "https://link" } },
+        error: null,
+      },
+      insert: { error: null },
+    });
+    createAdminClient.mockReturnValue(fake.client);
+    enviarEmail.mockResolvedValue({ ok: false, erro: "Não foi possível enviar o email." });
+
+    const { convidarAdmin } = await import("./actions");
+    const formData = new FormData();
+    formData.set("email", "novo@exemplo.com");
+
+    const res = await convidarAdmin(formData);
+    expect(res.ok).toBe(false);
+    expect(fake.deleteFn).toHaveBeenCalled();
     expect(fake.deleteUser).toHaveBeenCalledWith("new-user");
   });
 });
