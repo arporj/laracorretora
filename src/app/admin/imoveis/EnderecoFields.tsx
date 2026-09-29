@@ -39,9 +39,18 @@ export function EnderecoFields({ imovel }: { imovel?: Imovel }) {
   const [cepCarregando, setCepCarregando] = useState(false);
   const [cepErro, setCepErro] = useState<string | null>(null);
 
-  const [cidades, setCidades] = useState<string[]>([]);
-  const [cidadesCarregando, setCidadesCarregando] = useState(false);
-  const [cidadesErro, setCidadesErro] = useState<string | null>(null);
+  // Resultado da busca no IBGE junto com o estado a que ele pertence. Lista,
+  // erro e "carregando" são derivados daqui — assim o efeito só mexe em
+  // estado quando a resposta chega, nunca de forma síncrona.
+  const [busca, setBusca] = useState<{
+    estado: string;
+    cidades: string[];
+    erro: string | null;
+  } | null>(null);
+  const buscaAtual = busca?.estado === estado ? busca : null;
+  const cidades = useMemo(() => buscaAtual?.cidades ?? [], [buscaAtual]);
+  const cidadesErro = buscaAtual?.erro ?? null;
+  const cidadesCarregando = Boolean(estado) && !buscaAtual;
   const [cidadeAberta, setCidadeAberta] = useState(false);
   const [cidadeIndiceAtivo, setCidadeIndiceAtivo] = useState(-1);
 
@@ -52,13 +61,8 @@ export function EnderecoFields({ imovel }: { imovel?: Imovel }) {
   }, [cidades, cidade]);
 
   useEffect(() => {
-    if (!estado) {
-      setCidades([]);
-      return;
-    }
+    if (!estado) return;
     let cancelado = false;
-    setCidadesCarregando(true);
-    setCidadesErro(null);
 
     fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estado}/municipios?orderBy=nome`)
       .then((res) => {
@@ -67,16 +71,16 @@ export function EnderecoFields({ imovel }: { imovel?: Imovel }) {
       })
       .then((dados) => {
         if (cancelado) return;
-        setCidades(dados.map((m) => m.nome));
+        setBusca({ estado, cidades: dados.map((m) => m.nome), erro: null });
       })
       .catch((err) => {
         if (cancelado) return;
         console.error("Erro ao carregar cidades do IBGE:", err);
-        setCidades([]);
-        setCidadesErro("Não foi possível carregar a lista de cidades. Digite manualmente.");
-      })
-      .finally(() => {
-        if (!cancelado) setCidadesCarregando(false);
+        setBusca({
+          estado,
+          cidades: [],
+          erro: "Não foi possível carregar a lista de cidades. Digite manualmente.",
+        });
       });
 
     return () => {
