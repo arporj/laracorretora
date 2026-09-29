@@ -1,3 +1,5 @@
+import { AVISO_AUTOMATICO_TEXTO, avisoAutomaticoHtml } from "./aviso-automatico";
+
 interface AdminInviteEmailInput {
   inviteLink: string;
 }
@@ -73,6 +75,13 @@ export function adminInviteEmail({ inviteLink }: AdminInviteEmailInput): EmailCo
               </td>
             </tr>
           </table>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;">
+            <tr>
+              <td>
+              ${avisoAutomaticoHtml(CORES.muted)}
+              </td>
+            </tr>
+          </table>
         </td>
       </tr>
     </table>
@@ -85,7 +94,10 @@ export function adminInviteEmail({ inviteLink }: AdminInviteEmailInput): EmailCo
 Acesse o link abaixo para criar sua senha e ativar seu acesso:
 ${inviteLink}
 
-Se você não esperava este convite, pode ignorar este e-mail com segurança.`;
+Se você não esperava este convite, pode ignorar este e-mail com segurança.
+
+--
+${AVISO_AUTOMATICO_TEXTO}`;
 
   return { subject, html, text };
 }

@@ -62,7 +62,7 @@ enviado via [Resend](https://resend.com), não pelo mailer padrão do Supabase
 4. Defina `EMAIL_FROM` com um endereço nesse domínio verificado, ex:
    `"LARA Negócios Imobiliários <no-reply@laranegociosimobiliarios.com.br>"`.
 5. Garanta que `NEXT_PUBLIC_SITE_URL` em produção aponta para o domínio real
-   (ex: `https://www.laranegociosimobiliarios.com.br`) — ele é usado no link
+   (ex: `https://laranegociosimobiliarios.com.br`) — ele é usado no link
    de redirecionamento do convite.
 
 Sem isso configurado (localmente ou em produção), `convidarAdmin` cadastra
