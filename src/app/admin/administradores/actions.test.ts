@@ -27,22 +27,36 @@ function makeAdminClient(opts: {
     data: { user: { id: string } | null; properties?: { hashed_token: string } | null };
     error: { code?: string } | null;
   };
+  /** Resposta do generateLink de recuperação, usado quando o convite volta `email_exists`. */
+  recovery?: {
+    data: { user: { id: string } | null; properties?: { hashed_token: string } | null };
+    error: { code?: string } | null;
+  };
+  /** Linha de `admins` encontrada na checagem da reativação. */
+  adminRow?: { user_id: string } | null;
   insert?: { error: unknown };
   deleteResult?: { error: unknown; count: number | null };
   rpc?: { error: unknown };
 } = {}) {
-  const generateLink = vi
-    .fn()
-    .mockResolvedValue(opts.invite ?? { data: { user: null, properties: null }, error: null });
+  const generateLink = vi.fn(async ({ type }: { type: string }) =>
+    type === "recovery"
+      ? (opts.recovery ?? { data: { user: null, properties: null }, error: null })
+      : (opts.invite ?? { data: { user: null, properties: null }, error: null }),
+  );
   const deleteUser = vi.fn().mockResolvedValue({ error: null });
   const insert = vi.fn().mockResolvedValue(opts.insert ?? { error: null });
   const deleteFn = vi.fn(() => makeQueryBuilder(opts.deleteResult ?? { error: null, count: 1 }));
+  const select = vi.fn(() => ({
+    eq: vi.fn(() => ({
+      maybeSingle: vi.fn().mockResolvedValue({ data: opts.adminRow ?? null, error: null }),
+    })),
+  }));
   const rpc = vi.fn().mockResolvedValue(opts.rpc ?? { error: null });
 
   return {
     client: {
       auth: { admin: { generateLink, deleteUser } },
-      from: vi.fn(() => ({ insert, delete: deleteFn })),
+      from: vi.fn(() => ({ insert, delete: deleteFn, select })),
       rpc,
     },
     generateLink,
@@ -152,18 +166,61 @@ describe("convidarAdmin", () => {
     expect(fake.deleteUser).toHaveBeenCalledWith("new-user");
   });
 
-  it("email já existente retorna mensagem específica", async () => {
-    const fake = makeAdminClient({
+  describe("email que já tem conta (ex: admin revogado)", () => {
+    const EMAIL_EXISTE = {
       invite: { data: { user: null, properties: null }, error: { code: "email_exists" } },
+      recovery: {
+        data: { user: { id: "user-antigo" }, properties: { hashed_token: "hash-rec" } },
+        error: null,
+      },
+    };
+
+    function formEmail() {
+      const formData = new FormData();
+      formData.set("email", "antigo@exemplo.com");
+      return formData;
+    }
+
+    it("reativa: volta para admins e manda convite com link de recuperação", async () => {
+      const fake = makeAdminClient({ ...EMAIL_EXISTE, adminRow: null });
+      createAdminClient.mockReturnValue(fake.client);
+
+      const { convidarAdmin } = await import("./actions");
+      const res = await convidarAdmin(formEmail());
+
+      expect(res).toEqual({ ok: true });
+      expect(fake.generateLink).toHaveBeenCalledWith({ type: "recovery", email: "antigo@exemplo.com" });
+      expect(fake.insert).toHaveBeenCalledWith({ user_id: "user-antigo" });
+      const { to, text } = enviarEmail.mock.calls[0][0];
+      expect(to).toBe("antigo@exemplo.com");
+      expect(text).toContain("https://site.teste/auth/confirmar?token_hash=hash-rec&type=recovery");
+      expect(revalidatePath).toHaveBeenCalledWith("/admin/administradores");
     });
-    createAdminClient.mockReturnValue(fake.client);
 
-    const { convidarAdmin } = await import("./actions");
-    const formData = new FormData();
-    formData.set("email", "existente@exemplo.com");
+    it("se já é admin, avisa e não envia nada", async () => {
+      const fake = makeAdminClient({ ...EMAIL_EXISTE, adminRow: { user_id: "user-antigo" } });
+      createAdminClient.mockReturnValue(fake.client);
 
-    const res = await convidarAdmin(formData);
-    expect(res).toEqual({ ok: false, erro: "Já existe um usuário com esse email." });
+      const { convidarAdmin } = await import("./actions");
+      const res = await convidarAdmin(formEmail());
+
+      expect(res).toEqual({ ok: false, erro: "Esse email já é administrador." });
+      expect(fake.insert).not.toHaveBeenCalled();
+      expect(enviarEmail).not.toHaveBeenCalled();
+    });
+
+    it("se o envio falhar, tira de admins mas NÃO apaga a conta que já existia", async () => {
+      const fake = makeAdminClient({ ...EMAIL_EXISTE, adminRow: null });
+      createAdminClient.mockReturnValue(fake.client);
+      enviarEmail.mockResolvedValue({ ok: false, erro: "falhou" });
+
+      const { convidarAdmin } = await import("./actions");
+      const res = await convidarAdmin(formEmail());
+
+      expect(res.ok).toBe(false);
+      expect(fake.deleteFn).toHaveBeenCalled();
+      expect(fake.deleteUser).not.toHaveBeenCalled();
+    });
   });
 
   it("desfaz o convite se o insert em `admins` falhar", async () => {

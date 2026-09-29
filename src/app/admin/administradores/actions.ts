@@ -6,7 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { isMockMode } from "@/lib/mock/config";
 import { enviarEmail } from "@/lib/email/send";
 import { adminInviteEmail } from "@/lib/email/templates/admin-invite";
-import { montarLinkConfirmacao } from "@/lib/auth/link-confirmacao";
+import { montarLinkConfirmacao, type TipoLinkAuth } from "@/lib/auth/link-confirmacao";
 
 export type AdminActionResultado = { ok: true } | { ok: false; erro: string };
 
@@ -31,15 +31,13 @@ export async function convidarAdmin(formData: FormData): Promise<AdminActionResu
   // em vez do e-mail padrão do Supabase Auth.
   const { data, error } = await admin.auth.admin.generateLink({ type: "invite", email });
 
+  if (error?.code === "email_exists") {
+    return reativarAdmin(admin, email);
+  }
+
   if (error || !data.user) {
     console.error("Erro ao gerar convite de admin:", error);
-    const jaExiste = error?.code === "email_exists";
-    return {
-      ok: false,
-      erro: jaExiste
-        ? "Já existe um usuário com esse email."
-        : "Não foi possível enviar o convite.",
-    };
+    return { ok: false, erro: "Não foi possível enviar o convite." };
   }
 
   const { error: insertError } = await admin.from("admins").insert({ user_id: data.user.id });
@@ -51,7 +49,7 @@ export async function convidarAdmin(formData: FormData): Promise<AdminActionResu
     return { ok: false, erro: "Não foi possível cadastrar o admin." };
   }
 
-  const envio = await enviarConvite(email, data.properties.hashed_token);
+  const envio = await enviarConvite(email, data.properties.hashed_token, "invite");
 
   if (!envio.ok) {
     console.error("Erro ao enviar email de convite:", envio.erro);
@@ -69,11 +67,67 @@ export async function convidarAdmin(formData: FormData): Promise<AdminActionResu
   return { ok: true };
 }
 
+/**
+ * O e-mail já tem conta de login, mas pode não estar em `admins`: é o caso de
+ * quem foi revogado (revogar só remove de `admins`; a conta continua no
+ * Supabase Auth). Nesse caso reativa — volta pra `admins` e manda o mesmo
+ * e-mail de convite, com link de recuperação pra pessoa criar uma senha nova.
+ */
+async function reativarAdmin(
+  admin: ReturnType<typeof createAdminClient>,
+  email: string,
+): Promise<AdminActionResultado> {
+  const { data, error } = await admin.auth.admin.generateLink({ type: "recovery", email });
+
+  if (error || !data.user) {
+    console.error("Erro ao gerar link de reativação de admin:", error);
+    return { ok: false, erro: "Não foi possível enviar o convite." };
+  }
+
+  const userId = data.user.id;
+
+  const { data: adminRow, error: selectError } = await admin
+    .from("admins")
+    .select("user_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (selectError) {
+    console.error("Erro ao checar admin existente:", selectError);
+    return { ok: false, erro: "Não foi possível enviar o convite." };
+  }
+  if (adminRow) {
+    return { ok: false, erro: "Esse email já é administrador." };
+  }
+
+  const { error: insertError } = await admin.from("admins").insert({ user_id: userId });
+
+  if (insertError) {
+    console.error("Erro ao reativar admin:", insertError);
+    return { ok: false, erro: "Não foi possível cadastrar o admin." };
+  }
+
+  const envio = await enviarConvite(email, data.properties.hashed_token, "recovery");
+
+  if (!envio.ok) {
+    console.error("Erro ao enviar email de reativação:", envio.erro);
+    // A conta já existia antes, então só desfazemos o acesso — não a conta.
+    await admin.from("admins").delete().eq("user_id", userId);
+    return {
+      ok: false,
+      erro: "Não foi possível enviar o email de convite. Nenhum acesso foi concedido — tente novamente.",
+    };
+  }
+
+  revalidatePath("/admin/administradores");
+  return { ok: true };
+}
+
 /** Monta e envia o e-mail de convite. Nunca lança: falhas (inclusive de configuração) viram `{ ok: false }`. */
-async function enviarConvite(email: string, tokenHash: string) {
+async function enviarConvite(email: string, tokenHash: string, tipo: TipoLinkAuth) {
   let conteudo;
   try {
-    conteudo = adminInviteEmail({ inviteLink: montarLinkConfirmacao(tokenHash, "invite") });
+    conteudo = adminInviteEmail({ inviteLink: montarLinkConfirmacao(tokenHash, tipo) });
   } catch (err) {
     return { ok: false as const, erro: err instanceof Error ? err.message : String(err) };
   }
