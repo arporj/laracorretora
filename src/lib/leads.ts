@@ -59,7 +59,13 @@ export async function criarLead(input: NovoLeadInput): Promise<NovoLeadResultado
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("leads").insert({ ...dados, status: "novo" });
+  // Colunas do banco são snake_case — `dados` usa imovelId (camelCase), então
+  // o mapeamento precisa ser explícito. Espalhar `dados` aqui mandava uma
+  // coluna "imovelId" inexistente e o PostgREST recusava todo lead.
+  const { imovelId, ...resto } = dados;
+  const { error } = await supabase
+    .from("leads")
+    .insert({ ...resto, imovel_id: imovelId, status: "novo" });
 
   if (error) {
     console.error("Erro ao criar lead:", error);

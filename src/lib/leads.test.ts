@@ -22,8 +22,40 @@ beforeEach(() => {
 });
 
 function fakeSupabaseInsert(error: unknown) {
-  return { from: vi.fn(() => ({ insert: vi.fn().mockResolvedValue({ error }) })) };
+  const insert = vi.fn().mockResolvedValue({ error });
+  return { from: vi.fn(() => ({ insert })), insert };
 }
+
+describe("criarLead — gravação", () => {
+  it("grava com as colunas do banco em snake_case (imovel_id, não imovelId)", async () => {
+    const fake = fakeSupabaseInsert(null);
+    createClient.mockResolvedValue(fake);
+
+    const { criarLead } = await import("./leads");
+    await criarLead({ ...INPUT, imovelId: "imovel-1", mensagem: "Olá" });
+
+    expect(fake.insert).toHaveBeenCalledWith({
+      imovel_id: "imovel-1",
+      nome: "Maria",
+      telefone: "(22) 99999-0000",
+      email: "maria@exemplo.com",
+      mensagem: "Olá",
+      origem: "form_contato",
+      status: "novo",
+    });
+  });
+
+  it("contato geral grava imovel_id nulo", async () => {
+    const fake = fakeSupabaseInsert(null);
+    createClient.mockResolvedValue(fake);
+
+    const { criarLead } = await import("./leads");
+    await criarLead(INPUT);
+
+    expect(fake.insert.mock.calls[0][0]).toMatchObject({ imovel_id: null });
+    expect(fake.insert.mock.calls[0][0]).not.toHaveProperty("imovelId");
+  });
+});
 
 describe("criarLead — aviso por e-mail", () => {
   it("agenda o aviso para depois da resposta quando o lead é salvo", async () => {
