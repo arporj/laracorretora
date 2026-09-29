@@ -84,3 +84,18 @@ sendo salvos mesmo se o aviso por e-mail falhar.
    caracteres** e exija **letras minúsculas, maiúsculas, números e
    símbolos**. O site já valida isso na tela `/definir-senha`, mas a regra
    no Supabase impede que alguém contorne a tela chamando a API direto.
+
+## 8. Fotos com marca d'água
+
+As fotos dos imóveis nunca são exibidas pelo link direto do storage: todas
+passam pela rota `/fotos/...` do site, que aplica a marca d'água no centro e
+guarda o resultado em cache. O bucket `imovel-fotos` é **privado** (migration
+`20260929140000_lara_bucket_fotos_privado.sql`), então a foto original não
+tem link público.
+
+- **Ordem ao publicar:** primeiro o deploy com a rota `/fotos`, só depois a
+  migration que torna o bucket privado. Ao contrário, as fotos somem do site.
+- **Trocar a marca** (ex: logo oficial): edite `scripts/gerar-marca-dagua.mjs`,
+  rode `node scripts/gerar-marca-dagua.mjs` e suba `VERSAO_MARCA_DAGUA` em
+  `src/lib/fotos/url.ts` para invalidar o cache. Vale para todas as fotos,
+  inclusive as antigas.

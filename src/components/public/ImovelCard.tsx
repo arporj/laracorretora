@@ -6,6 +6,7 @@ import {
   type ImovelComFotos,
 } from "@/lib/domain/types";
 import { formatCentsToBRL } from "@/lib/domain/format";
+import { urlFoto } from "@/lib/fotos/url";
 
 export function ImovelCard({ imovel }: { imovel: ImovelComFotos }) {
   const capa = imovel.imovel_fotos[0];
@@ -20,7 +21,7 @@ export function ImovelCard({ imovel }: { imovel: ImovelComFotos }) {
         {capa ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={capa.url}
+            src={urlFoto(capa)}
             alt={imovel.titulo}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />

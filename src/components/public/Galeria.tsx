@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { ImovelFoto } from "@/lib/domain/types";
+import { urlFoto } from "@/lib/fotos/url";
 
 export function Galeria({ fotos, titulo }: { fotos: ImovelFoto[]; titulo: string }) {
   const [indice, setIndice] = useState(0);
@@ -22,7 +23,7 @@ export function Galeria({ fotos, titulo }: { fotos: ImovelFoto[]; titulo: string
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           key={fotoAtual.id}
-          src={fotoAtual.url}
+          src={urlFoto(fotoAtual)}
           alt={`${titulo} — foto ${indice + 1}`}
           className="fade-in h-full w-full object-cover"
         />
@@ -64,7 +65,7 @@ export function Galeria({ fotos, titulo }: { fotos: ImovelFoto[]; titulo: string
               }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={foto.url} alt="" className="h-full w-full object-cover" />
+              <img src={urlFoto(foto)} alt="" className="h-full w-full object-cover" />
             </button>
           ))}
         </div>

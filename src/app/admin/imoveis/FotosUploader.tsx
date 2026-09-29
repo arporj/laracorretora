@@ -7,6 +7,7 @@ import { Button } from "@/components/Button";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { Spinner } from "@/components/Spinner";
 import type { ImovelFoto } from "@/lib/domain/types";
+import { urlFoto } from "@/lib/fotos/url";
 import { uploadFoto, deleteFoto, reorderFotos } from "./fotos-actions";
 
 const MAX_LADO = 1600;
@@ -140,7 +141,7 @@ export function FotosUploader({ imovelId, fotos }: { imovelId: string; fotos: Im
           return (
             <div key={foto.id} className="relative h-28 w-36 overflow-hidden rounded-lg border border-border">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={foto.url} alt="" className="h-full w-full object-cover" />
+              <img src={urlFoto(foto)} alt="" className="h-full w-full object-cover" />
               {i === 0 && (
                 <span className="eyebrow absolute left-1.5 top-1.5 rounded-full bg-orange px-2 py-0.5 text-[10px] text-white">
                   Capa
