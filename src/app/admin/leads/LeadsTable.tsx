@@ -5,17 +5,11 @@ import { useRouter } from "next/navigation";
 import { MessageCircle, ExternalLink } from "lucide-react";
 import { StatusLeadBadge } from "@/components/admin/StatusBadge";
 import { LEAD_STATUS_LABELS, type Lead, type StatusLead } from "@/lib/domain/types";
-import { buildWhatsAppLinkPara } from "@/lib/whatsapp";
+import { buildWhatsAppLinkPara, normalizarNumeroWhatsApp } from "@/lib/whatsapp";
 import { updateLeadStatus } from "./actions";
 
 interface LeadComImovel extends Lead {
   imoveis: { titulo: string; codigo: string; slug: string } | null;
-}
-
-function buildWhatsAppNumero(telefone: string): string {
-  const digitos = telefone.replace(/\D/g, "");
-  if (digitos.startsWith("55")) return digitos;
-  return `55${digitos}`;
 }
 
 export function LeadsTable({ leads }: { leads: LeadComImovel[] }) {
@@ -52,7 +46,7 @@ export function LeadsTable({ leads }: { leads: LeadComImovel[] }) {
               <td className="px-4 py-3">
                 <a
                   href={buildWhatsAppLinkPara(
-                    buildWhatsAppNumero(lead.telefone),
+                    normalizarNumeroWhatsApp(lead.telefone),
                     `Olá ${lead.nome}! Aqui é da LARA Negócios Imobiliários.`,
                   )}
                   target="_blank"

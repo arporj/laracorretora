@@ -1,5 +1,8 @@
 import "server-only";
+import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { notificarNovoLead } from "@/lib/email/notificar-novo-lead";
+import { getIpRequisicao } from "@/lib/rate-limit";
 import { isMockMode } from "@/lib/mock/config";
 import { mockCriarLead, mockUpdateLeadStatus } from "@/lib/mock/mutations";
 import { mockGetLeadsComImovel } from "@/lib/mock/queries";
@@ -62,6 +65,11 @@ export async function criarLead(input: NovoLeadInput): Promise<NovoLeadResultado
     console.error("Erro ao criar lead:", error);
     return { ok: false, erro: "Não foi possível enviar. Tente novamente em instantes." };
   }
+
+  // O aviso por e-mail pra Lara sai depois da resposta ao visitante, pra
+  // não deixar o formulário esperando o envio.
+  const ip = await getIpRequisicao();
+  after(() => notificarNovoLead(dados, ip));
 
   return { ok: true };
 }

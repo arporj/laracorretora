@@ -24,7 +24,7 @@ function makeQueryBuilder(finalResult: unknown) {
 
 function makeAdminClient(opts: {
   invite?: {
-    data: { user: { id: string } | null; properties?: { action_link: string } | null };
+    data: { user: { id: string } | null; properties?: { hashed_token: string } | null };
     error: { code?: string } | null;
   };
   insert?: { error: unknown };
@@ -59,6 +59,7 @@ beforeEach(() => {
   isMockMode.mockReturnValue(false);
   enviarEmail.mockResolvedValue({ ok: true });
   vi.spyOn(console, "error").mockImplementation(() => {});
+  process.env.NEXT_PUBLIC_SITE_URL = "https://site.teste";
 });
 
 describe("convidarAdmin", () => {
@@ -92,7 +93,7 @@ describe("convidarAdmin", () => {
   it("convida com sucesso, cadastra o admin e envia o email", async () => {
     const fake = makeAdminClient({
       invite: {
-        data: { user: { id: "new-user" }, properties: { action_link: "https://link" } },
+        data: { user: { id: "new-user" }, properties: { hashed_token: "hash-abc" } },
         error: null,
       },
       insert: { error: null },
@@ -112,6 +113,45 @@ describe("convidarAdmin", () => {
     expect(revalidatePath).toHaveBeenCalledWith("/admin/administradores");
   });
 
+  it("o link do convite aponta para /auth/confirmar do próprio site, sem depender de redirectTo", async () => {
+    const fake = makeAdminClient({
+      invite: {
+        data: { user: { id: "new-user" }, properties: { hashed_token: "hash-abc" } },
+        error: null,
+      },
+    });
+    createAdminClient.mockReturnValue(fake.client);
+
+    const { convidarAdmin } = await import("./actions");
+    const formData = new FormData();
+    formData.set("email", "novo@exemplo.com");
+    await convidarAdmin(formData);
+
+    expect(fake.generateLink).toHaveBeenCalledWith({ type: "invite", email: "novo@exemplo.com" });
+    const { text } = enviarEmail.mock.calls[0][0];
+    expect(text).toContain("https://site.teste/auth/confirmar?token_hash=hash-abc&type=invite");
+  });
+
+  it("desfaz o cadastro se NEXT_PUBLIC_SITE_URL não estiver configurada (em vez de mandar link quebrado)", async () => {
+    delete process.env.NEXT_PUBLIC_SITE_URL;
+    const fake = makeAdminClient({
+      invite: {
+        data: { user: { id: "new-user" }, properties: { hashed_token: "hash-abc" } },
+        error: null,
+      },
+    });
+    createAdminClient.mockReturnValue(fake.client);
+
+    const { convidarAdmin } = await import("./actions");
+    const formData = new FormData();
+    formData.set("email", "novo@exemplo.com");
+    const res = await convidarAdmin(formData);
+
+    expect(res.ok).toBe(false);
+    expect(enviarEmail).not.toHaveBeenCalled();
+    expect(fake.deleteUser).toHaveBeenCalledWith("new-user");
+  });
+
   it("email já existente retorna mensagem específica", async () => {
     const fake = makeAdminClient({
       invite: { data: { user: null, properties: null }, error: { code: "email_exists" } },
@@ -129,7 +169,7 @@ describe("convidarAdmin", () => {
   it("desfaz o convite se o insert em `admins` falhar", async () => {
     const fake = makeAdminClient({
       invite: {
-        data: { user: { id: "new-user" }, properties: { action_link: "https://link" } },
+        data: { user: { id: "new-user" }, properties: { hashed_token: "hash-abc" } },
         error: null,
       },
       insert: { error: new Error("boom") },
@@ -149,7 +189,7 @@ describe("convidarAdmin", () => {
   it("desfaz o cadastro se o envio do email falhar", async () => {
     const fake = makeAdminClient({
       invite: {
-        data: { user: { id: "new-user" }, properties: { action_link: "https://link" } },
+        data: { user: { id: "new-user" }, properties: { hashed_token: "hash-abc" } },
         error: null,
       },
       insert: { error: null },
@@ -162,7 +202,10 @@ describe("convidarAdmin", () => {
     formData.set("email", "novo@exemplo.com");
 
     const res = await convidarAdmin(formData);
-    expect(res.ok).toBe(false);
+    expect(res).toEqual({
+      ok: false,
+      erro: "Não foi possível enviar o email de convite. Nenhum acesso foi concedido — tente novamente.",
+    });
     expect(fake.deleteFn).toHaveBeenCalled();
     expect(fake.deleteUser).toHaveBeenCalledWith("new-user");
   });

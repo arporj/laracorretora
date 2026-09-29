@@ -40,6 +40,16 @@ describe("enviarEmail", () => {
     });
   });
 
+  it("repassa o replyTo quando informado", async () => {
+    const send = vi.fn().mockResolvedValue({ data: { id: "email-1" }, error: null });
+    getResendClient.mockReturnValue({ emails: { send } });
+
+    const { enviarEmail } = await import("./send");
+    await enviarEmail({ ...EMAIL_INPUT, replyTo: "cliente@exemplo.com" });
+
+    expect(send).toHaveBeenCalledWith(expect.objectContaining({ replyTo: "cliente@exemplo.com" }));
+  });
+
   it("retorna erro amigável quando o Resend recusa o envio", async () => {
     const send = vi.fn().mockResolvedValue({ data: null, error: { message: "domínio não verificado" } });
     getResendClient.mockReturnValue({ emails: { send } });

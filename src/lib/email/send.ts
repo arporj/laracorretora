@@ -6,6 +6,8 @@ export interface EnviarEmailInput {
   subject: string;
   html: string;
   text: string;
+  /** Para onde vai a resposta quando o destinatário clica em "Responder" (ex: e-mail do cliente num aviso de lead). */
+  replyTo?: string;
 }
 
 export type EnviarEmailResultado = { ok: true } | { ok: false; erro: string };
@@ -37,6 +39,7 @@ export async function enviarEmail(input: EnviarEmailInput): Promise<EnviarEmailR
       subject: input.subject,
       html: input.html,
       text: input.text,
+      ...(input.replyTo ? { replyTo: input.replyTo } : {}),
     });
 
     if (error) {
