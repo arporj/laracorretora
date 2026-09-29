@@ -127,7 +127,9 @@ async function reativarAdmin(
 async function enviarConvite(email: string, tokenHash: string, tipo: TipoLinkAuth) {
   let conteudo;
   try {
-    conteudo = adminInviteEmail({ inviteLink: montarLinkConfirmacao(tokenHash, tipo) });
+    conteudo = adminInviteEmail({
+      inviteLink: montarLinkConfirmacao(tokenHash, tipo, { convite: true }),
+    });
   } catch (err) {
     return { ok: false as const, erro: err instanceof Error ? err.message : String(err) };
   }

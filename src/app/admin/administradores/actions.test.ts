@@ -193,7 +193,7 @@ describe("convidarAdmin", () => {
       expect(fake.insert).toHaveBeenCalledWith({ user_id: "user-antigo" });
       const { to, text } = enviarEmail.mock.calls[0][0];
       expect(to).toBe("antigo@exemplo.com");
-      expect(text).toContain("https://site.teste/auth/confirmar?token_hash=hash-rec&type=recovery");
+      expect(text).toContain("https://site.teste/auth/confirmar?token_hash=hash-rec&type=recovery&convite=1");
       expect(revalidatePath).toHaveBeenCalledWith("/admin/administradores");
     });
 

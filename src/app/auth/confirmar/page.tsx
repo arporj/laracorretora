@@ -5,13 +5,13 @@ import { confirmarLink } from "./actions";
 export const metadata = { title: "Confirmar acesso — LARA Negócios Imobiliários" };
 
 interface ConfirmarPageProps {
-  searchParams: Promise<{ token_hash?: string; type?: string }>;
+  searchParams: Promise<{ token_hash?: string; type?: string; convite?: string }>;
 }
 
 export default async function ConfirmarPage({ searchParams }: ConfirmarPageProps) {
-  const { token_hash, type } = await searchParams;
+  const { token_hash, type, convite: conviteParam } = await searchParams;
   const confirmarAction = confirmarLink.bind(null, token_hash ?? "", type ?? "");
-  const convite = type === "invite";
+  const convite = type === "invite" || conviteParam === "1";
 
   return (
     <AuthShell

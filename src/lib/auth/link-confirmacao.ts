@@ -13,7 +13,15 @@ export function isTipoLinkAuth(valor: unknown): valor is TipoLinkAuth {
  * da URL (#access_token=...), invisível pro servidor, e depende da lista
  * de Redirect URLs configurada no painel do Supabase.
  */
-export function montarLinkConfirmacao(tokenHash: string, tipo: TipoLinkAuth): string {
+export function montarLinkConfirmacao(
+  tokenHash: string,
+  tipo: TipoLinkAuth,
+  opts: { convite?: boolean } = {},
+): string {
   const params = new URLSearchParams({ token_hash: tokenHash, type: tipo });
+  // Reativar um admin revogado usa link de recuperação (a conta já existe),
+  // mas a tela deve falar em "ativar acesso", não em "redefinir senha".
+  // Só afeta o texto da página — a validação usa sempre `type`.
+  if (opts.convite && tipo !== "invite") params.set("convite", "1");
   return `${getSiteUrl()}/auth/confirmar?${params.toString()}`;
 }

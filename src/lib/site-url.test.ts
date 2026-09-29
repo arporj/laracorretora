@@ -32,6 +32,20 @@ describe("montarLinkConfirmacao", () => {
       "https://site.teste/auth/confirmar?token_hash=abc123&type=recovery",
     );
   });
+
+  it("marca como convite um link de recuperação usado para reativar admin", () => {
+    process.env.NEXT_PUBLIC_SITE_URL = "https://site.teste";
+    expect(montarLinkConfirmacao("abc123", "recovery", { convite: true })).toBe(
+      "https://site.teste/auth/confirmar?token_hash=abc123&type=recovery&convite=1",
+    );
+  });
+
+  it("não repete a marcação em link que já é de convite", () => {
+    process.env.NEXT_PUBLIC_SITE_URL = "https://site.teste";
+    expect(montarLinkConfirmacao("abc123", "invite", { convite: true })).toBe(
+      "https://site.teste/auth/confirmar?token_hash=abc123&type=invite",
+    );
+  });
 });
 
 describe("isTipoLinkAuth", () => {
