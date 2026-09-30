@@ -11,10 +11,6 @@ const DIFERENCIAIS = [
     texto: "Do primeiro contato até a assinatura, direto com a Lara — sem intermediários.",
   },
   {
-    titulo: "CRECI regularizado",
-    texto: "Corretora registrada (CRECI RJ / 01072759), com segurança em cada negociação.",
-  },
-  {
     titulo: "Resposta rápida",
     texto: "Fale pelo WhatsApp e receba retorno ágil sobre o imóvel que te interessa.",
   },
@@ -32,7 +28,7 @@ export default async function HomePage() {
       <HeroBusca />
 
       <section className="border-b border-border bg-white py-14">
-        <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 sm:grid-cols-3 sm:px-6">
+        <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 sm:grid-cols-2 sm:px-6">
           {DIFERENCIAIS.map((item) => (
             <div key={item.titulo}>
               <div className="rule-gold w-10" aria-hidden="true" />
