@@ -7,13 +7,13 @@ export interface EmailContent {
 }
 
 export const CORES = {
-  charcoal: "#17130f",
+  charcoal: "#454a52",
   orange: "#f26b0f",
   orangeDark: "#d65a08",
-  cream: "#faf5ec",
-  ink: "#1f1a15",
-  muted: "#746856",
-  border: "#e7dac2",
+  cream: "#f4f5f7",
+  ink: "#1f2328",
+  muted: "#676d76",
+  border: "#e1e4e8",
 };
 
 /**

@@ -1,18 +1,23 @@
 @import "tailwindcss";
 
+/*
+ * Paleta "chumbo + laranja" (2026-09). Os nomes charcoal/gold/cream vêm da
+ * paleta anterior e foram mantidos para não renomear em todos os componentes:
+ * charcoal = cinza chumbo, gold = laranja de destaque, cream = fundo cinza-claro.
+ */
 :root {
-  --charcoal: #17130f;
-  --charcoal-soft: #262019;
+  --charcoal: #454a52;
+  --charcoal-soft: #565c65;
   --orange: #f26b0f;
   --orange-dark: #d65a08;
   --orange-tint: #ffb374;
-  --gold: #ad8a53;
-  --gold-soft: #e7d9bd;
-  --cream: #faf5ec;
+  --gold: #f26b0f;
+  --gold-soft: #ffb374;
+  --cream: #f4f5f7;
   --white: #ffffff;
-  --ink: #1f1a15;
-  --muted: #746856;
-  --border: #e7dac2;
+  --ink: #1f2328;
+  --muted: #676d76;
+  --border: #e1e4e8;
   --success: #3e8e5b;
   --warning: #c98a1e;
   --danger: #c4432e;

@@ -76,7 +76,7 @@ export function AdminSidebar({ isSuperAdmin, email }: AdminSidebarProps) {
         </span>
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm text-white">{email}</div>
-          <div className="text-xs text-white/50">{isSuperAdmin ? "Super-admin" : "Admin"}</div>
+          <div className="text-xs text-white/75">{isSuperAdmin ? "Super-admin" : "Admin"}</div>
         </div>
       </div>
       <form action="/auth/signout" method="post" className="mt-1">

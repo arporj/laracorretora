@@ -165,31 +165,31 @@ export function Simulador() {
             </div>
             <div className="grid grid-cols-2 gap-4 border-t border-white/10 pt-5 text-sm">
               <div>
-                <div className="text-white/50">Última parcela</div>
+                <div className="text-white/75">Última parcela</div>
                 <div className="font-display mt-0.5 text-base">
                   {formatCentsToBRL(resultado.parcelaFinalCents)}
                 </div>
               </div>
               <div>
-                <div className="text-white/50">Valor financiado</div>
+                <div className="text-white/75">Valor financiado</div>
                 <div className="font-display mt-0.5 text-base">
                   {formatCentsToBRL(resultado.valorFinanciadoCents)}
                 </div>
               </div>
               <div>
-                <div className="text-white/50">Total de juros</div>
+                <div className="text-white/75">Total de juros</div>
                 <div className="font-display mt-0.5 text-base">
                   {formatCentsToBRL(resultado.totalJurosCents)}
                 </div>
               </div>
               <div>
-                <div className="text-white/50">Total pago</div>
+                <div className="text-white/75">Total pago</div>
                 <div className="font-display mt-0.5 text-base">
                   {formatCentsToBRL(resultado.totalPagoCents)}
                 </div>
               </div>
             </div>
-            <p className="border-t border-white/10 pt-4 text-xs leading-relaxed text-white/50">
+            <p className="border-t border-white/10 pt-4 text-xs leading-relaxed text-white/75">
               Simulação pelo sistema SAC (amortização constante), só para
               referência — não considera seguro habitacional, taxas
               administrativas nem análise de crédito. Condições reais dependem
@@ -197,7 +197,7 @@ export function Simulador() {
             </p>
           </div>
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-3 py-10 text-center text-white/60">
+          <div className="flex h-full flex-col items-center justify-center gap-3 py-10 text-center text-white/75">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="text-gold" aria-hidden="true">
               <path d="M4 19h16M6 19V9l6-4 6 4v10M10 19v-6h4v6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
